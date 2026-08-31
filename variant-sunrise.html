@@ -339,7 +339,7 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--text3)}
     <section class="hero glass" id="overview">
       <div class="hero-left">
         <div class="kicker" id="todayLabel">今天 · 8月31日 星期一</div>
-        <h1 id="greetTitle">欢迎来到勇勇任务栏，勇往向前，阿勇</h1>
+        <h1 id="greetTitle">欢迎来到每天开心任务工作栏，搞薯条，加油！！！</h1>
         <p class="hero-sub">把今天过成喜欢的样子：已完成 <b id="taskCount">3 / 6</b> 项任务，专注 <b id="focusText">5 小时 20 分</b>，比昨天多 <b>+12%</b>。</p>
         <div class="hero-actions">
           <button class="btn btn-primary" id="heroAddBtn">＋ 添加今日计划</button>
@@ -460,7 +460,7 @@ const TYPE_COLORS={任务:'#6366f1',工作:'#f97316',目标:'#10b981',消费:'#e
 const GOAL_COLORS=[['#10b981','#34d399'],['#f97316','#fb923c'],['#ec4899','#f472b6']];
 const ST_TEXT={todo:'待开始',doing:'进行中',done:'已完成'};
 const DEFAULTS={
-  profile:{greeting:'欢迎来到勇勇任务栏，勇往向前，阿勇'},
+  profile:{greeting:'欢迎来到每天开心任务工作栏，搞薯条，加油！！！'},
   tasks:[
     {t:'晨间复盘 · 15 分钟',done:true,p:'high'},
     {t:'完成产品需求文档 v2',done:false,p:'high'},
@@ -531,7 +531,7 @@ function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;',
 function applyGreeting(){
   const t=document.getElementById('greetTitle');
   if(t){
-    const g=S.profile&&S.profile.greeting?S.profile.greeting:'欢迎来到勇勇任务栏，勇往向前，阿勇';
+    const g=S.profile&&S.profile.greeting?S.profile.greeting:'欢迎来到每天开心任务工作栏，搞薯条，加油！！！';
     t.textContent=g;
   }
 }
