@@ -1,0 +1,31 @@
+{
+  "name": "勇勇任务栏",
+  "short_name": "勇勇任务栏",
+  "description": "个人日程管理面板：任务、工作、目标、消费、课程、学习",
+  "start_url": "./variant-sunrise.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#eef3ff",
+  "theme_color": "#6366f1",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
