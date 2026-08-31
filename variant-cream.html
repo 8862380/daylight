@@ -100,6 +100,9 @@ input{font-family:inherit}
 .add-task input{flex:1;padding:11px 15px;border-radius:14px;border:1px solid var(--card-border);background:var(--field);color:var(--text);font-size:13px;outline:none}
 .add-task input:focus{border-color:var(--accent)}
 .add-task button{padding:11px 18px;border-radius:14px;background:var(--accent);color:#fff;font-size:13px;font-weight:700}
+.add-task input.flash{box-shadow:0 0 0 3px var(--accent)}
+#toast{position:fixed;left:50%;bottom:36px;transform:translateX(-50%) translateY(20px);background:rgba(23,28,47,.92);color:#fff;padding:12px 22px;border-radius:999px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:.3s;z-index:99;box-shadow:0 12px 30px rgba(0,0,0,.25)}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* work blocks */
 .block{display:flex;align-items:center;gap:14px;padding:14px 4px;border-bottom:1px dashed var(--card-border)}
@@ -235,8 +238,8 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--text3)}
         <h1>早上好，小宇 👋</h1>
         <p class="hero-sub">把今天过成喜欢的样子：已完成 <b id="taskCount">3 / 6</b> 项任务，专注 <b>5 小时 20 分</b>，比昨天多 <b>+12%</b>。</p>
         <div class="hero-actions">
-          <button class="btn btn-primary">＋ 添加今日计划</button>
-          <button class="btn btn-ghost">查看周报</button>
+          <button class="btn btn-primary" id="heroAddBtn">＋ 添加今日计划</button>
+          <button class="btn btn-ghost" id="heroReportBtn">查看周报</button>
         </div>
       </div>
       <div class="hero-ring">
@@ -395,7 +398,21 @@ function addTask(){
   const inp=document.getElementById('addInput');
   const v=inp.value.trim();if(!v)return;
   tasks.push({t:v,done:false,p:'med'});
-  inp.value='';save();render();
+  inp.value='';save();render();toast('已添加 ✓');
+}
+document.getElementById('heroAddBtn').addEventListener('click',()=>{
+  document.getElementById('tasks').scrollIntoView({behavior:'smooth',block:'start'});
+  setTimeout(()=>{const i=document.getElementById('addInput');i.focus();i.classList.add('flash');setTimeout(()=>i.classList.remove('flash'),900);},520);
+});
+document.getElementById('heroReportBtn').addEventListener('click',()=>{
+  document.getElementById('study').scrollIntoView({behavior:'smooth',block:'start'});
+});
+let toastTimer=null;
+function toast(msg){
+  let el=document.getElementById('toast');
+  if(!el){el=document.createElement('div');el.id='toast';document.body.appendChild(el);}
+  el.textContent=msg;el.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),1800);
 }
 render();
 const d=new Date();
