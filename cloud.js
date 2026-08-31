@@ -210,4 +210,32 @@
     saveProfile: saveProfile,
     adminAll: adminAll,
   };
+
+  // 北京时间工具（所有页面统一用 Asia/Shanghai）
+  function bjParts() {
+    var parts = new Intl.DateTimeFormat('zh-CN', {
+      timeZone: 'Asia/Shanghai',
+      year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short',
+      hour: '2-digit', minute: '2-digit', hour12: false,
+    }).formatToParts(new Date());
+    var map = {};
+    parts.forEach(function (p) { map[p.type] = p.value; });
+    if (map.hour === '24') map.hour = '00';
+    return map;
+  }
+  window.DaylightTime = {
+    parts: bjParts,
+    fmtHM: function () {
+      var p = bjParts();
+      return (p.hour || '00') + ':' + (p.minute || '00');
+    },
+    weekdayIndex: function () {
+      var wd = bjParts().weekday || '';
+      var names = ['日', '一', '二', '三', '四', '五', '六'];
+      for (var i = 0; i < 7; i++) {
+        if (wd.indexOf(names[i]) >= 0) return i;
+      }
+      return new Date().getDay();
+    },
+  };
 })();
