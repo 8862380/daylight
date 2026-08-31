@@ -99,6 +99,7 @@
 
   window.DaylightAuth = {
     profiles: profiles,
+    saveProfiles: saveProfiles,
     user: user,
     setUser: setUser,
     dataKey: dataKey,
