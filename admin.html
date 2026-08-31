@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daylight · 后台管理</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Microsoft YaHei",sans-serif;
+  background:linear-gradient(165deg,#f4f7ff 0%,#eef3ff 30%,#fdeef4 68%,#fff6e8 100%);
+  color:#171c2f;min-height:100vh;-webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:980px;margin:0 auto;padding:24px 20px 72px}
+.top{display:flex;align-items:center;gap:14px;margin-bottom:22px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:15px}
+.dot{width:28px;height:28px;border-radius:9px;background:linear-gradient(135deg,#6366f1,#f43f5e,#f59e0b)}
+h1{font-size:22px;font-weight:800;letter-spacing:-.4px}
+.top-actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.btn{padding:10px 16px;border-radius:999px;border:none;font-size:13px;font-weight:700;cursor:pointer;background:#e9ecf5;color:#5b6478;transition:.15s;text-decoration:none;display:inline-block}
+.btn:hover{filter:brightness(.96)}
+.btn.primary{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff}
+.btn.danger{background:#fde8ea;color:#d6455d}
+.note{font-size:12px;color:#5b6478;background:rgba(255,255,255,.75);border:1px solid rgba(255,255,255,.9);border-radius:14px;padding:10px 14px;margin-bottom:18px;line-height:1.6}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px}
+.st{background:rgba(255,255,255,.82);border:1px solid rgba(255,255,255,.95);border-radius:16px;padding:12px 14px}
+.st b{font-size:20px;font-weight:800;display:block}
+.st span{font-size:11px;color:#5b6478}
+.sec{background:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.95);border-radius:22px;padding:20px;margin-bottom:16px;box-shadow:0 14px 34px rgba(60,75,140,.08)}
+.sec h2{font-size:16px;font-weight:700;margin-bottom:4px}
+.sec .sub{font-size:12px;color:#5b6478;margin-bottom:14px}
+.add{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.add input,.add select{flex:1;min-width:110px;padding:9px 12px;border-radius:12px;border:1px solid #e3e8f2;background:#f7f9fe;font-size:13px;outline:none;color:#171c2f}
+.add input:focus{border-color:#6366f1}
+.add button{padding:9px 16px;border-radius:12px;border:none;background:#6366f1;color:#fff;font-size:13px;font-weight:700;cursor:pointer}
+.row{display:flex;align-items:center;gap:10px;padding:10px 8px;border-bottom:1px dashed #e8ecf6;flex-wrap:wrap}
+.row:last-of-type{border-bottom:none}
+.row .main{flex:1;min-width:180px}
+.row .main b{font-size:14px;font-weight:600;display:block}
+.row .main small{font-size:11px;color:#8a93a8}
+.chip{font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;background:#eef0f8;color:#5b6478;white-space:nowrap}
+.chip.done{background:#d9f0e1;color:#16a34a}
+.chip.doing{background:#fde9d9;color:#f97316}
+.ops{display:flex;gap:6px}
+.ico{width:28px;height:28px;border-radius:9px;border:none;font-size:12px;cursor:pointer;background:#eef0f8;color:#5b6478;display:flex;align-items:center;justify-content:center}
+.ico:hover{background:#dde3f2}
+.ico.del:hover{background:#fde8ea;color:#d6455d}
+.study-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:12px}
+.study-cell{text-align:center}
+.study-cell b{font-size:12px;display:block;margin-bottom:6px;color:#5b6478}
+.study-cell input{width:100%;padding:8px 4px;text-align:center;border-radius:10px;border:1px solid #e3e8f2;background:#f7f9fe;font-size:13px;outline:none}
+.base-grid{display:flex;gap:8px;flex-wrap:wrap}
+.base-grid .bc{flex:1;min-width:120px}
+.base-grid .bc b{font-size:12px;display:block;margin-bottom:6px;color:#5b6478}
+.base-grid input{width:100%;padding:8px 10px;border-radius:10px;border:1px solid #e3e8f2;background:#f7f9fe;font-size:13px;outline:none}
+.edit-form{display:flex;gap:8px;flex-wrap:wrap;width:100%;align-items:center}
+.edit-form input,.edit-form select{flex:1;min-width:110px;padding:8px 12px;border-radius:11px;border:1px solid #6366f1;background:#fff;font-size:13px;outline:none}
+.edit-form label{font-size:12px;color:#5b6478;display:flex;align-items:center;gap:5px}
+#toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(20px);background:rgba(23,28,47,.92);color:#fff;padding:11px 20px;border-radius:999px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:.3s;z-index:99}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media (max-width:700px){
+  .stats{grid-template-columns:repeat(3,1fr)}
+  .study-grid{grid-template-columns:repeat(4,1fr)}
+  .top-actions{margin-left:0}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="logo"><span class="dot"></span>Daylight · 后台管理</div>
+    <div class="top-actions">
+      <a class="btn" href="index.html">← 返回站点</a>
+      <button class="btn" id="exportBtn">导出数据</button>
+      <button class="btn" id="importBtn">导入数据</button>
+      <button class="btn danger" id="resetBtn">重置默认</button>
+      <input type="file" id="importFile" accept=".json" style="display:none">
+    </div>
+  </div>
+  <div class="note">
+    所有主题共用同一份数据，修改后立即生效并保存在当前浏览器。管理后台与主页在同一个浏览器里看到的内容是一致的；
+    换设备（如手机）需要「导出 → 导入」同步一次。
+  </div>
+  <div class="stats">
+    <div class="st"><b id="cTasks">0</b><span>任务 · 未完成</span></div>
+    <div class="st"><b id="cWork">0</b><span>工作事项</span></div>
+    <div class="st"><b id="cGoals">0</b><span>目标</span></div>
+    <div class="st"><b id="cExp">0</b><span>消费记录</span></div>
+    <div class="st"><b id="cCourse">0</b><span>课程</span></div>
+  </div>
+  <div class="sec">
+    <h2>今日任务</h2>
+    <div class="sub">增删改、勾选完成、优先级</div>
+    <div class="add">
+      <input id="taskName" placeholder="任务内容">
+      <select id="taskPrio"><option value="high">高优先级</option><option value="med" selected>中优先级</option><option value="low">低优先级</option></select>
+      <button id="taskAdd">添加</button>
+    </div>
+    <div id="taskRows"></div>
+  </div>
+  <div class="sec">
+    <h2>今日工作</h2>
+    <div class="sub">时间段、标签、状态、时长（小时）</div>
+    <div class="add">
+      <input id="workName" placeholder="工作内容">
+      <input id="workTime" placeholder="时间，如 09:00 – 10:30" style="flex:1.4">
+      <input id="workTag" placeholder="标签">
+      <input id="workDur" placeholder="时长h" type="number" step="0.5" min="0" style="max-width:80px">
+      <button id="workAdd">添加</button>
+    </div>
+    <div id="workRows"></div>
+  </div>
+  <div class="sec">
+    <h2>目标追踪</h2>
+    <div class="sub">名称、当前进度、目标值</div>
+    <div class="add">
+      <input id="goalName" placeholder="目标名称">
+      <input id="goalCur" placeholder="当前" type="number" min="0" style="max-width:110px">
+      <input id="goalMax" placeholder="目标" type="number" min="1" style="max-width:110px">
+      <select id="goalFmt"><option value="num">数值</option><option value="money">金额</option></select>
+      <button id="goalAdd">添加</button>
+    </div>
+    <div id="goalRows"></div>
+  </div>
+  <div class="sec">
+    <h2>今日消费</h2>
+    <div class="sub">名称、分类、金额、时间；勾选「月度」表示月度订阅</div>
+    <div class="add">
+      <input id="expName" placeholder="消费名称">
+      <select id="expCat">
+        <option>餐饮</option><option>学习</option><option>交通</option><option>生活</option><option>其他</option>
+      </select>
+      <input id="expAmt" placeholder="金额" type="number" step="0.5" min="0" style="max-width:100px">
+      <input id="expTime" placeholder="时间" style="max-width:110px">
+      <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:#5b6478"><input id="expMonthly" type="checkbox" style="width:auto">月度</label>
+      <button id="expAdd">添加</button>
+    </div>
+    <div id="expRows"></div>
+  </div>
+  <div class="sec">
+    <h2>课程安排</h2>
+    <div class="sub">时间、名称、备注；可标记完成</div>
+    <div class="add">
+      <input id="courseName" placeholder="课程名称">
+      <input id="courseTime" placeholder="时间，如 19:30 – 20:30" style="flex:1.3">
+      <input id="courseMeta" placeholder="备注，如 网课 · 60 分钟">
+      <button id="courseAdd">添加</button>
+    </div>
+    <div id="courseRows"></div>
+  </div>
+  <div class="sec">
+    <h2>学习时间（本周，小时）</h2>
+    <div class="sub">直接修改每天的小时数，点「保存学习数据」生效</div>
+    <div class="study-grid" id="studyGrid"></div>
+    <button class="btn primary" id="studySave">保存学习数据</button>
+  </div>
+  <div class="sec">
+    <h2>月度消费基数（高级）</h2>
+    <div class="sub">各分类的本月基础金额，环形图会在基础上叠加新记账</div>
+    <div class="base-grid" id="baseGrid"></div>
+    <button class="btn primary" id="baseSave" style="margin-top:12px">保存月度基数</button>
+  </div>
+</div>
+<div id="toast"></div>
+<script>
+const KEY='daylight_data';
+const CATS=['餐饮','学习','交通','生活','其他'];
+const CAT_COLORS={餐饮:'#f97316',学习:'#8b5cf6',交通:'#0ea5e9',生活:'#10b981',其他:'#64748b'};
+const DEFAULTS={
+  tasks:[
+    {t:'晨间复盘 · 15 分钟',done:true,p:'high'},
+    {t:'完成产品需求文档 v2',done:false,p:'high'},
+    {t:'健身 40 分钟',done:false,p:'med'},
+    {t:'阅读《纳瓦尔宝典》30 页',done:false,p:'low'},
+    {t:'回复团队邮件',done:true,p:'low'},
+    {t:'整理本周消费账单',done:false,p:'med'}
+  ],
+  work:[
+    {time:'09:30 – 11:00',title:'深度工作 · 需求评审',tag:'产品 · 会议室 A',status:'done',dur:1.5},
+    {time:'14:00 – 16:00',title:'Dashboard 改版设计',tag:'设计 · 高专注',status:'doing',dur:2},
+    {time:'20:30 – 21:30',title:'副业 · 博客更新',tag:'写作 · 每周五篇',status:'todo',dur:1}
+  ],
+  goals:[
+    {name:'年度阅读 48 本',cur:27,max:48,fmt:'num'},
+    {name:'副业月收入 ¥3,000',cur:1860,max:3000,fmt:'money'},
+    {name:'减脂 8 kg',cur:5,max:8,fmt:'num'}
+  ],
+  monthlyBase:{餐饮:879.5,学习:213,交通:286,生活:390,其他:195},
+  expenses:[
+    {name:'咖啡 + 三明治',cat:'餐饮',amt:18.5,time:'08:10',monthly:false},
+    {name:'轻食沙拉',cat:'餐饮',amt:28,time:'12:30',monthly:false},
+    {name:'地铁通勤',cat:'交通',amt:6,time:'09:00',monthly:false},
+    {name:'日语网课 · 月度订阅',cat:'学习',amt:420,time:'本月',monthly:true}
+  ],
+  courses:[
+    {time:'08:00 – 08:30',title:'晨读英语 · 口语模仿',meta:'Zoom · 30 分钟',done:false},
+    {time:'19:30 – 20:30',title:'日语 N3 精读',meta:'网课 · 60 分钟',done:false},
+    {time:'21:00 – 21:45',title:'前端进阶 · 响应式布局',meta:'B站 · 45 分钟',done:false}
+  ],
+  study:[{d:'周一',h:2.5},{d:'周二',h:3},{d:'周三',h:1.5},{d:'周四',h:2},{d:'周五',h:4},{d:'周六',h:5},{d:'周日',h:3.5}]
+};
+let S=load();
+function fresh(){return JSON.parse(JSON.stringify(DEFAULTS));}
+function load(){
+  try{
+    const raw=localStorage.getItem(KEY);
+    if(raw)return merge(fresh(),JSON.parse(raw));
+    for(const legacy of ['daylight_sunrise','daylight_midnight','daylight_cream']){
+      const old=localStorage.getItem(legacy);
+      if(old){
+        try{const s=merge(fresh(),JSON.parse(old));save(s);return s;}catch(e){}
+      }
+    }
+  }catch(e){}
+  return fresh();
+}
+function merge(s,p){
+  for(const k of Object.keys(DEFAULTS)){
+    if(p[k]){
+      if(typeof p[k]==='object'&&!Array.isArray(p[k]))Object.assign(s[k],p[k]);
+      else s[k]=p[k];
+    }
+  }
+  return s;
+}
+function save(s){localStorage.setItem(KEY,JSON.stringify(s||S));}
+function esc(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function money(n){return '¥'+Number(n).toLocaleString('zh-CN',{maximumFractionDigits:2});}
+let toastTimer=null;
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),1800);
+}
+let editing=null;
+
+function renderAll(){
+  renderTasks();renderWork();renderGoals();renderExpenses();renderCourses();renderStudy();renderBase();renderCounts();
+}
+function renderCounts(){
+  document.getElementById('cTasks').textContent=S.tasks.filter(t=>!t.done).length;
+  document.getElementById('cWork').textContent=S.work.length;
+  document.getElementById('cGoals').textContent=S.goals.length;
+  document.getElementById('cExp').textContent=S.expenses.length;
+  document.getElementById('cCourse').textContent=S.courses.length;
+}
+function opsRow(sec,idx){
+  return '<div class="ops"><button class="ico" data-sec="'+sec+'" data-i="'+idx+'" data-act="edit">编辑</button>'+
+         '<button class="ico del" data-sec="'+sec+'" data-i="'+idx+'" data-act="del">✕</button></div>';
+}
+function renderTasks(){
+  const box=document.getElementById('taskRows');box.innerHTML='';
+  S.tasks.forEach((t,i)=>{
+    if(editing==='task:'+i){
+      const r=document.createElement('div');r.className='row';
+      r.innerHTML='<div class="edit-form"><input class="ef-task-t" value="'+esc(t.t)+'">'+
+        '<select class="ef-task-p"><option value="high"'+(t.p==='high'?' selected':'')+'>高</option><option value="med"'+(t.p==='med'?' selected':'')+'>中</option><option value="low"'+(t.p==='low'?' selected':'')+'>低</option></select>'+
+        '<label><input type="checkbox" class="ef-task-d"'+(t.done?' checked':'')+'>完成</label>'+
+        '<button class="btn primary" data-sec="task" data-i="'+i+'" data-act="save">保存</button>'+
+        '<button class="btn" data-act="cancel">取消</button></div>';
+      box.appendChild(r);return;
+    }
+    const r=document.createElement('div');r.className='row';
+    r.innerHTML='<div class="main"><b'+(t.done?' style="text-decoration:line-through;color:#9aa3b8"':'')+'>'+esc(t.t)+'</b>'+
+      '<small>'+({high:'高优先级',med:'中优先级',low:'低优先级'}[t.p]||'')+'</small></div>'+
+      '<span class="chip'+(t.done?' done':'')+'" data-sec="task" data-i="'+i+'" data-act="toggle" style="cursor:pointer">'+(t.done?'已完成':'进行中')+'</span>'+
+      opsRow('task',i);
+    box.appendChild(r);
+  });
+}
+function renderWork(){
+  const box=document.getElementById('workRows');box.innerHTML='';
+  const stT={todo:'待开始',doing:'进行中',done:'已完成'};
+  S.work.forEach((w,i)=>{
+    if(editing==='work:'+i){
+      const r=document.createElement('div');r.className='row';
+      r.innerHTML='<div class="edit-form"><input class="ef-work-title" value="'+esc(w.title)+'">'+
+        '<input class="ef-work-time" value="'+esc(w.time)+'" style="flex:1.3">'+
+        '<input class="ef-work-tag" value="'+esc(w.tag)+'">'+
+        '<input class="ef-work-dur" type="number" step="0.5" min="0" value="'+esc(w.dur)+'" style="max-width:80px">'+
+        '<select class="ef-work-st"><option value="todo"'+(w.status==='todo'?' selected':'')+'>待开始</option><option value="doing"'+(w.status==='doing'?' selected':'')+'>进行中</option><option value="done"'+(w.status==='done'?' selected':'')+'>已完成</option></select>'+
+        '<button class="btn primary" data-sec="work" data-i="'+i+'" data-act="save">保存</button><button class="btn" data-act="cancel">取消</button></div>';
+      box.appendChild(r);return;
+    }
+    const r=document.createElement('div');r.className='row';
+    r.innerHTML='<div class="main"><b>'+esc(w.title)+'</b><small>'+esc(w.time)+' · '+esc(w.tag)+' · '+(w.dur||0)+'h</small></div>'+
+      '<span class="chip '+(w.status==='done'?'done':w.status==='doing'?'doing':'')+'" data-sec="work" data-i="'+i+'" data-act="toggle" style="cursor:pointer">'+stT[w.status]+'</span>'+
+      opsRow('work',i);
+    box.appendChild(r);
+  });
+}
+function renderGoals(){
+  const box=document.getElementById('goalRows');box.innerHTML='';
+  S.goals.forEach((g,i)=>{
+    if(editing==='goal:'+i){
+      const r=document.createElement('div');r.className='row';
+      r.innerHTML='<div class="edit-form"><input class="ef-goal-name" value="'+esc(g.name)+'">'+
+        '<input class="ef-goal-cur" type="number" min="0" value="'+esc(g.cur)+'" style="max-width:110px">'+
+        '<input class="ef-goal-max" type="number" min="1" value="'+esc(g.max)+'" style="max-width:110px">'+
+        '<select class="ef-goal-fmt"><option value="num"'+(g.fmt==='num'?' selected':'')+'>数值</option><option value="money"'+(g.fmt==='money'?' selected':'')+'>金额</option></select>'+
+        '<button class="btn primary" data-sec="goal" data-i="'+i+'" data-act="save">保存</button><button class="btn" data-act="cancel">取消</button></div>';
+      box.appendChild(r);return;
+    }
+    const pct=Math.round(g.cur/g.max*100);
+    const r=document.createElement('div');r.className='row';
+    r.innerHTML='<div class="main"><b>'+esc(g.name)+'</b><small>'+esc(g.cur)+' / '+esc(g.max)+' · '+pct+'%</small></div>'+
+      '<span class="chip">'+pct+'%</span>'+opsRow('goal',i);
+    box.appendChild(r);
+  });
+}
+function renderExpenses(){
+  const box=document.getElementById('expRows');box.innerHTML='';
+  S.expenses.forEach((e,i)=>{
+    if(editing==='exp:'+i){
+      const r=document.createElement('div');r.className='row';
+      r.innerHTML='<div class="edit-form"><input class="ef-exp-name" value="'+esc(e.name)+'">'+
+        '<select class="ef-exp-cat">'+CATS.map(c=>'<option'+(c===e.cat?' selected':'')+'>'+c+'</option>').join('')+'</select>'+
+        '<input class="ef-exp-amt" type="number" step="0.5" min="0" value="'+esc(e.amt)+'" style="max-width:100px">'+
+        '<input class="ef-exp-time" value="'+esc(e.time)+'" style="max-width:110px">'+
+        '<label><input type="checkbox" class="ef-exp-mon"'+(e.monthly?' checked':'')+'>月度</label>'+
+        '<button class="btn primary" data-sec="exp" data-i="'+i+'" data-act="save">保存</button><button class="btn" data-act="cancel">取消</button></div>';
+      box.appendChild(r);return;
+    }
+    const r=document.createElement('div');r.className='row';
+    r.innerHTML='<div class="main"><b>'+esc(e.name)+'</b><small>'+esc(e.cat)+(e.monthly?' · 月度':'')+'</small></div>'+
+      '<span class="chip">'+money(e.amt)+'</span>'+opsRow('exp',i);
+    box.appendChild(r);
+  });
+}
+function renderCourses(){
+  const box=document.getElementById('courseRows');box.innerHTML='';
+  S.courses.forEach((c,i)=>{
+    if(editing==='course:'+i){
+      const r=document.createElement('div');r.className='row';
+      r.innerHTML='<div class="edit-form"><input class="ef-course-title" value="'+esc(c.title)+'">'+
+        '<input class="ef-course-time" value="'+esc(c.time)+'" style="flex:1.2">'+
+        '<input class="ef-course-meta" value="'+esc(c.meta)+'">'+
+        '<label><input type="checkbox" class="ef-course-done"'+(c.done?' checked':'')+'>完成</label>'+
+        '<button class="btn primary" data-sec="course" data-i="'+i+'" data-act="save">保存</button><button class="btn" data-act="cancel">取消</button></div>';
+      box.appendChild(r);return;
+    }
+    const r=document.createElement('div');r.className='row';
+    r.innerHTML='<div class="main"><b'+(c.done?' style="text-decoration:line-through;color:#9aa3b8"':'')+'>'+esc(c.title)+'</b>'+
+      '<small>'+esc(c.time)+' · '+esc(c.meta)+'</small></div>'+
+      '<span class="chip'+(c.done?' done':'')+'" data-sec="course" data-i="'+i+'" data-act="toggle" style="cursor:pointer">'+(c.done?'已完成':'未完成')+'</span>'+
+      opsRow('course',i);
+    box.appendChild(r);
+  });
+}
+function renderStudy(){
+  const box=document.getElementById('studyGrid');box.innerHTML='';
+  S.study.forEach((s,i)=>{
+    const el=document.createElement('div');el.className='study-cell';
+    el.innerHTML='<b>'+s.d+'</b><input class="ef-study" data-i="'+i+'" type="number" step="0.5" min="0" value="'+esc(s.h)+'">';
+    box.appendChild(el);
+  });
+}
+function renderBase(){
+  const box=document.getElementById('baseGrid');box.innerHTML='';
+  CATS.forEach(cat=>{
+    const el=document.createElement('div');el.className='bc';
+    el.innerHTML='<b style="color:'+CAT_COLORS[cat]+'">'+cat+'</b><input class="ef-base" data-cat="'+cat+'" type="number" step="0.5" min="0" value="'+esc(S.monthlyBase[cat]||0)+'">';
+    box.appendChild(el);
+  });
+}
+document.addEventListener('click',e=>{
+  const btn=e.target.closest('[data-act]');
+  if(!btn)return;
+  const act=btn.dataset.act,sec=btn.dataset.sec,i=parseInt(btn.dataset.i||-1,10);
+  if(act==='cancel'){editing=null;renderAll();return;}
+  if(act==='edit'){editing=sec+':'+i;renderAll();return;}
+  if(act==='del'){
+    const arr=sec==='task'?S.tasks:sec==='work'?S.work:sec==='goal'?S.goals:sec==='exp'?S.expenses:S.courses;
+    arr.splice(i,1);
+    editing=null;save();renderAll();toast('已删除');
+    return;
+  }
+  if(act==='toggle'){
+    if(sec==='task'){S.tasks[i].done=!S.tasks[i].done;}
+    if(sec==='work'){S.work[i].status=S.work[i].status==='todo'?'doing':S.work[i].status==='doing'?'done':'todo';}
+    if(sec==='course'){S.courses[i].done=!S.courses[i].done;}
+    save();renderAll();toast('已更新');
+    return;
+  }
+  if(act==='save'){
+    const q=s=>btn.parentElement.querySelector(s);
+    if(sec==='task'){
+      S.tasks[i].t=q('.ef-task-t').value.trim()||S.tasks[i].t;
+      S.tasks[i].p=q('.ef-task-p').value;
+      S.tasks[i].done=q('.ef-task-d').checked;
+    }
+    if(sec==='work'){
+      S.work[i].title=q('.ef-work-title').value.trim()||S.work[i].title;
+      S.work[i].time=q('.ef-work-time').value.trim()||'灵活时段';
+      S.work[i].tag=q('.ef-work-tag').value.trim()||'自定义';
+      S.work[i].dur=parseFloat(q('.ef-work-dur').value)||0;
+      S.work[i].status=q('.ef-work-st').value;
+    }
+    if(sec==='goal'){
+      S.goals[i].name=q('.ef-goal-name').value.trim()||S.goals[i].name;
+      S.goals[i].cur=parseFloat(q('.ef-goal-cur').value)||0;
+      S.goals[i].max=parseFloat(q('.ef-goal-max').value)||1;
+      S.goals[i].fmt=q('.ef-goal-fmt').value;
+    }
+    if(sec==='exp'){
+      S.expenses[i].name=q('.ef-exp-name').value.trim()||S.expenses[i].name;
+      S.expenses[i].cat=q('.ef-exp-cat').value;
+      S.expenses[i].amt=parseFloat(q('.ef-exp-amt').value)||0;
+      S.expenses[i].time=q('.ef-exp-time').value.trim()||'--:--';
+      S.expenses[i].monthly=q('.ef-exp-mon').checked;
+    }
+    if(sec==='course'){
+      S.courses[i].title=q('.ef-course-title').value.trim()||S.courses[i].title;
+      S.courses[i].time=q('.ef-course-time').value.trim()||'--:--';
+      S.courses[i].meta=q('.ef-course-meta').value.trim()||'自定义';
+      S.courses[i].done=q('.ef-course-done').checked;
+    }
+    editing=null;save();renderAll();toast('已保存 ✓');
+  }
+});
+document.getElementById('taskAdd').addEventListener('click',()=>{
+  const v=document.getElementById('taskName').value.trim();if(!v)return;
+  S.tasks.push({t:v,done:false,p:document.getElementById('taskPrio').value});
+  document.getElementById('taskName').value='';save();renderAll();toast('已添加 ✓');
+});
+document.getElementById('workAdd').addEventListener('click',()=>{
+  const v=document.getElementById('workName').value.trim();if(!v)return;
+  S.work.push({time:document.getElementById('workTime').value.trim()||'灵活时段',title:v,tag:document.getElementById('workTag').value.trim()||'自定义',status:'todo',dur:parseFloat(document.getElementById('workDur').value)||0});
+  ['workName','workTime','workTag','workDur'].forEach(id=>document.getElementById(id).value='');
+  save();renderAll();toast('已添加 ✓');
+});
+document.getElementById('goalAdd').addEventListener('click',()=>{
+  const v=document.getElementById('goalName').value.trim();if(!v)return;
+  S.goals.push({name:v,cur:parseFloat(document.getElementById('goalCur').value)||0,max:parseFloat(document.getElementById('goalMax').value)||1,fmt:document.getElementById('goalFmt').value});
+  ['goalName','goalCur','goalMax'].forEach(id=>document.getElementById(id).value='');
+  save();renderAll();toast('已添加 ✓');
+});
+document.getElementById('expAdd').addEventListener('click',()=>{
+  const v=document.getElementById('expName').value.trim();if(!v)return;
+  S.expenses.push({name:v,cat:document.getElementById('expCat').value,amt:parseFloat(document.getElementById('expAmt').value)||0,time:document.getElementById('expTime').value.trim()||'--:--',monthly:document.getElementById('expMonthly').checked});
+  ['expName','expAmt','expTime'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('expMonthly').checked=false;
+  save();renderAll();toast('已添加 ✓');
+});
+document.getElementById('courseAdd').addEventListener('click',()=>{
+  const v=document.getElementById('courseName').value.trim();if(!v)return;
+  S.courses.push({time:document.getElementById('courseTime').value.trim()||'--:--',title:v,meta:document.getElementById('courseMeta').value.trim()||'自定义',done:false});
+  ['courseName','courseTime','courseMeta'].forEach(id=>document.getElementById(id).value='');
+  save();renderAll();toast('已添加 ✓');
+});
+document.getElementById('studySave').addEventListener('click',()=>{
+  document.querySelectorAll('.ef-study').forEach(inp=>{
+    S.study[parseInt(inp.dataset.i,10)].h=parseFloat(inp.value)||0;
+  });
+  save();renderAll();toast('学习数据已保存 ✓');
+});
+document.getElementById('baseSave').addEventListener('click',()=>{
+  document.querySelectorAll('.ef-base').forEach(inp=>{
+    S.monthlyBase[inp.dataset.cat]=parseFloat(inp.value)||0;
+  });
+  save();renderAll();toast('月度基数已保存 ✓');
+});
+document.getElementById('exportBtn').addEventListener('click',()=>{
+  const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='daylight-data.json';
+  a.click();
+  toast('已导出 JSON ✓');
+});
+document.getElementById('importBtn').addEventListener('click',()=>document.getElementById('importFile').click());
+document.getElementById('importFile').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  const rd=new FileReader();
+  rd.onload=()=>{
+    try{
+      const p=JSON.parse(rd.result);
+      S=merge(fresh(),p);
+      save();renderAll();toast('导入成功 ✓');
+    }catch(err){toast('文件格式不正确');}
+  };
+  rd.readAsText(f);
+  e.target.value='';
+});
+document.getElementById('resetBtn').addEventListener('click',()=>{
+  if(confirm('确定要恢复默认示例数据吗？当前数据会被覆盖。')){
+    S=fresh();save();renderAll();toast('已恢复默认');
+  }
+});
+renderAll();
+</script>
+</body>
+</html>
