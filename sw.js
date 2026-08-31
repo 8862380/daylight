@@ -1,9 +1,10 @@
-const CACHE = 'daylight-v4';
+const CACHE = 'daylight-v5';
 const SCOPE = self.registration.scope;
 const ASSETS = [
   './',
   './index.html',
   './admin.html',
+  './cloud.js',
   './auth.js',
   './variant-sunrise.html',
   './variant-midnight.html',
