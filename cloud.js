@@ -30,6 +30,14 @@
 
   var currentUser = null;
 
+  function usernameEmail(name) {
+    var s = String(name || '').toLowerCase();
+    var h = 5381;
+    for (var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0;
+    var hex = ('00000000' + h.toString(16)).slice(-8);
+    return 'u' + hex + '@daylight.local';
+  }
+
   function setUser(u) { currentUser = u; }
 
   function applySession(res) {
@@ -68,7 +76,8 @@
     }).catch(function () { return currentUser; });
   }
 
-  function signIn(email, password) {
+  function signIn(input, password) {
+    var email = String(input || '').indexOf('@') >= 0 ? input : usernameEmail(input);
     return api('/auth/v1/token?grant_type=password', {
       method: 'POST',
       body: { email: email, password: password },
@@ -77,11 +86,12 @@
         applySession(res);
         return { ok: true, user: currentUser };
       }
-      return { ok: false, error: (res.json && res.json.error_description) || res.json.error || '登录失败' };
+      return { ok: false, error: '用户名或密码错误' };
     }).catch(function () { return { ok: false, error: '网络错误' }; });
   }
 
-  function signUp(name, email, password) {
+  function signUp(name, password) {
+    var email = usernameEmail(name);
     return api('/auth/v1/signup', {
       method: 'POST',
       body: { email: email, password: password, data: { name: name } },
@@ -91,7 +101,9 @@
         if (u) return { ok: true, user: u, confirmed: true };
         return { ok: true, confirmed: false, user: res.json.user || null };
       }
-      return { ok: false, error: (res.json && (res.json.msg || res.json.error_description)) || '注册失败' };
+      var msg = res.json && (res.json.msg || res.json.error_description || res.json.error) || '';
+      if (String(msg).indexOf('already') >= 0) return { ok: false, error: '用户名已被注册' };
+      return { ok: false, error: '注册失败：' + msg };
     }).catch(function () { return { ok: false, error: '网络错误' }; });
   }
 
