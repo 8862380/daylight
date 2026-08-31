@@ -79,6 +79,9 @@ h1{font-size:22px;font-weight:800;letter-spacing:-.4px}
 .login-fields input{padding:12px 16px;border-radius:14px;border:1px solid #e3e8f2;background:#f7f9fe;font-size:14px;outline:none;text-align:center;color:#171c2f}
 .login-fields input:focus{border-color:#6366f1}
 .login-btn{padding:13px;border-radius:14px;border:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:14px;font-weight:700;cursor:pointer}
+.login-signup.ghost{padding:13px;border-radius:14px;border:1px solid #e3e8f2;background:#f2f4fa;color:#5b6478;font-size:14px;font-weight:600;cursor:pointer}
+.login-status{font-size:12px;color:#d6455d;min-height:18px;line-height:1.4}
+.admin-badge{font-size:10px;font-weight:800;padding:3px 8px;border-radius:999px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff}
 .user-chip{font-size:12px;font-weight:700;padding:8px 14px;border-radius:999px;background:#e9ecf5;color:#5b6478;align-self:center}
 .user-card{border:1px solid #e3e8f2;border-radius:16px;padding:14px 16px;margin-bottom:10px;background:#fbfcff}
 .uc-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
@@ -115,12 +118,14 @@ h1{font-size:22px;font-weight:800;letter-spacing:-.4px}
   <div class="login-card">
     <div class="login-icon"></div>
     <h2>勇勇任务栏</h2>
-    <p>选择或创建你的个人空间</p>
-    <div class="profile-list"></div>
+    <p>邮箱登录 · 数据云端同步</p>
     <div class="login-fields">
-      <input class="login-name" placeholder="你的名字" autocomplete="off">
-      <input class="login-pin" type="password" placeholder="4 位密码（可选）" maxlength="4" inputmode="numeric">
-      <button class="login-btn">登录 / 创建</button>
+      <input class="login-name" placeholder="你的名字（注册时填）" autocomplete="off">
+      <input class="login-email" type="email" placeholder="邮箱" autocomplete="email">
+      <input class="login-pass" type="password" placeholder="密码（至少 6 位）" autocomplete="current-password">
+      <button class="login-submit">登录</button>
+      <button class="login-signup ghost">注册新账号</button>
+      <div class="login-status"></div>
     </div>
   </div>
 </div>
@@ -236,10 +241,11 @@ h1{font-size:22px;font-weight:800;letter-spacing:-.4px}
   </div>
 </div>
 <div id="toast"></div>
+<script src="cloud.js"></script>
 <script src="auth.js"></script>
 <script>
-const USER=DaylightAuth.user();
-const KEY=DaylightAuth.dataKey(USER);
+let USER='';
+let KEY='';
 const CATS=['餐饮','学习','交通','生活','其他'];
 const CAT_COLORS={餐饮:'#f97316',学习:'#8b5cf6',交通:'#0ea5e9',生活:'#10b981',其他:'#64748b'};
 const DEFAULTS={
@@ -300,7 +306,16 @@ function merge(s,p){
   }
   return s;
 }
-function save(s){if(!USER)return;localStorage.setItem(KEY,JSON.stringify(s||S));}
+let saveTimer=null;
+function save(s){
+  if(!USER)return;
+  localStorage.setItem(KEY,JSON.stringify(s||S));
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(function(){
+    DaylightCloud.saveData(s||S);
+    DaylightCloud.saveProfile(DaylightAuth.name()||'', ((s||S).profile&&(s||S).profile.greeting)||'');
+  },500);
+}
 function esc(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function money(n){return '¥'+Number(n).toLocaleString('zh-CN',{maximumFractionDigits:2});}
 let toastTimer=null;
@@ -342,55 +357,49 @@ function userDetailHtml(data){
 function renderUserData(){
   const box=document.getElementById('userDataList');
   if(!box)return;
-  box.innerHTML='';
-  const ps=DaylightAuth.profiles();
-  if(!ps.length){
-    box.innerHTML='<div class="sub" style="margin:0">本设备还没有注册用户</div>';
-    return;
-  }
-  ps.forEach((p,pi)=>{
-    let data=null;
-    try{data=JSON.parse(localStorage.getItem(DaylightAuth.dataKey(p.name))||'null');}catch(e){}
-    const tcount=data&&data.tasks?data.tasks.length:0;
-    const wcount=data&&data.work?data.work.length:0;
-    const gcount=data&&data.goals?data.goals.length:0;
-    const ecount=data&&data.expenses?data.expenses.length:0;
-    const ccount=data&&data.courses?data.courses.length:0;
-    const study=data&&data.study?data.study.reduce((a,s)=>a+s.h,0).toFixed(1):'0';
-    const card=document.createElement('div');card.className='user-card';
-    card.innerHTML='<div class="uc-head"><span class="pc-avatar">'+esc(p.name.charAt(0)||'?')+'</span><b>'+esc(p.name)+'</b>'+
-      (p.pin?'<span class="chip">有密码</span>':'<span class="chip">无密码</span>')+
-      '<span class="uc-counts">任务 '+tcount+' · 工作 '+wcount+' · 目标 '+gcount+' · 消费 '+ecount+' · 课程 '+ccount+' · 学习 '+study+'h</span>'+
-      '<button class="ico" data-u="'+pi+'" data-ud="view">'+(expandedUser===p.name?'收起':'查看')+'</button>'+
-      '<button class="ico del" data-u="'+pi+'" data-ud="del">✕</button></div>';
-    if(expandedUser===p.name){
-      card.innerHTML+='<div class="uc-detail">'+userDetailHtml(data)+'</div>';
+  box.innerHTML='<div class="sub" style="margin:0">加载中…</div>';
+  DaylightCloud.adminAll().then(function(list){
+    if(!box)return;
+    box.innerHTML='';
+    if(!list.length){
+      box.innerHTML='<div class="sub" style="margin:0">暂无其他用户数据（管理员账号可见全部）</div>';
+      return;
     }
-    box.appendChild(card);
+    list.forEach(function(p,pi){
+      const data=p.data;
+      const tcount=data&&data.tasks?data.tasks.length:0;
+      const wcount=data&&data.work?data.work.length:0;
+      const gcount=data&&data.goals?data.goals.length:0;
+      const ecount=data&&data.expenses?data.expenses.length:0;
+      const ccount=data&&data.courses?data.courses.length:0;
+      const study=data&&data.study?data.study.reduce((a,s)=>a+s.h,0).toFixed(1):'0';
+      const card=document.createElement('div');card.className='user-card';
+      card.innerHTML='<div class="uc-head"><span class="pc-avatar">'+esc((p.name||'?').charAt(0))+'</span><b>'+esc(p.name||'未命名')+'</b>'+
+        (p.id===DaylightAuth.uid()?'<span class="chip">自己</span>':'')+
+        (DaylightCloud.isAdmin()?'<span class="admin-badge">管理员</span>':'')+
+        '<span class="uc-counts">任务 '+tcount+' · 工作 '+wcount+' · 目标 '+gcount+' · 消费 '+ecount+' · 课程 '+ccount+' · 学习 '+study+'h</span>'+
+        '<button class="ico" data-u="'+pi+'" data-ud="view">'+(expandedUser===p.id?'收起':'查看')+'</button></div>';
+      if(expandedUser===p.id){
+        card.innerHTML+='<div class="uc-detail">'+userDetailHtml(data)+'</div>';
+      }
+      box.appendChild(card);
+    });
   });
 }
 document.getElementById('userDataList').addEventListener('click',function(e){
   const btn=e.target.closest('[data-ud]');
   if(!btn)return;
   const pi=parseInt(btn.dataset.u,10);
-  const ps=DaylightAuth.profiles();
-  const p=ps[pi];
-  if(!p)return;
-  if(btn.dataset.ud==='view'){
-    expandedUser=expandedUser===p.name?null:p.name;
-    renderUserData();
-  }
-  if(btn.dataset.ud==='del'){
-    if(p.name===USER){toast('不能删除当前登录用户');return;}
-    if(confirm('确定删除用户「'+p.name+'」及其全部数据？')){
-      ps.splice(pi,1);
-      DaylightAuth.saveProfiles(ps);
-      localStorage.removeItem(DaylightAuth.dataKey(p.name));
-      if(expandedUser===p.name)expandedUser=null;
-      renderUserData();toast('已删除用户');
+  DaylightCloud.adminAll().then(function(list){
+    const p=list[pi];
+    if(!p)return;
+    if(btn.dataset.ud==='view'){
+      expandedUser=expandedUser===p.id?null:p.id;
+      renderUserData();
     }
-  }
+  });
 });
+
 function renderCounts(){
   document.getElementById('cTasks').textContent=S.tasks.filter(t=>!t.done).length;
   document.getElementById('cWork').textContent=S.work.length;
@@ -651,14 +660,32 @@ document.getElementById('resetBtn').addEventListener('click',()=>{
 function bootAdmin(){
   document.getElementById('adminGate').style.display='none';
   document.getElementById('adminWrap').style.display='block';
+  USER=DaylightAuth.user();
   if(USER){
-    document.getElementById('currentUser').textContent='当前用户：'+USER;
+    KEY=DaylightAuth.dataKey(DaylightAuth.uid());
+    S=load();
+    const cu=document.getElementById('currentUser');
+    cu.textContent='当前用户：'+USER;
+    cu.innerHTML=cu.textContent+(DaylightCloud.isAdmin()?' <span class="admin-badge">管理员</span>':'');
     renderAll();
+    DaylightCloud.loadData().then(function(cd){
+      if(cd&&typeof cd==='object'){
+        S=merge(fresh(),cd);
+        try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}
+        renderAll();
+      }else{
+        save();
+      }
+    });
   }else{
     DaylightAuth.mountLogin('loginOverlay',function(){location.reload();});
   }
 }
 function gate(){
+  if(DaylightAuth.adminUnlocked()){
+    bootAdmin();
+    return;
+  }
   const gateEl=document.getElementById('adminGate');
   const cfg=DaylightAuth.adminGet();
   const p1=gateEl.querySelector('.gate-pass');
@@ -698,7 +725,7 @@ document.getElementById('changeAdmBtn').addEventListener('click',function(){
   if(v!==v2){toast('两次输入不一致');return;}
   DaylightAuth.setupAdmin(v);toast('开发者密码已修改 ✓');
 });
-gate();
+DaylightAuth.init().then(function(){gate();});
 </script>
 <script>
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){});}
