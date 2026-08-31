@@ -711,10 +711,8 @@ function addExpense(){
   const a=parseFloat(document.getElementById('expAmt').value);
   if(!n||isNaN(a)||a<=0){toast('请填写名称和金额');return;}
   const cat=document.getElementById('expCat').value;
-  const d=new Date();
-  const hh=String(d.getHours()).padStart(2,'0');
-  const mm=String(d.getMinutes()).padStart(2,'0');
-  S.expenses.push({name:n,cat:cat,amt:a,time:hh+':'+mm,monthly:false});
+  const hm=DaylightTime.fmtHM();
+  S.expenses.push({name:n,cat:cat,amt:a,time:hm,monthly:false});
   document.getElementById('expName').value='';
   document.getElementById('expAmt').value='';
   save();renderExpenses();toast('已记账 ✓');
@@ -728,7 +726,7 @@ function addCourse(){
 function addStudy(){
   const min=parseFloat(document.getElementById('studyMin').value);
   if(isNaN(min)||min<=0||min>1440){toast('请输入有效的分钟数');return;}
-  const idx=new Date().getDay();
+  const idx=DaylightTime.weekdayIndex();
   const dayIdx=idx===0?6:idx-1;
   S.study[dayIdx].h=Math.round((S.study[dayIdx].h+min/60)*10)/10;
   document.getElementById('studyMin').value='';
@@ -801,10 +799,19 @@ function toast(msg){
 }
 
 function dateLabel(){
-  const d=new Date();
-  const wd=['日','一','二','三','四','五','六'][d.getDay()];
   const el=document.getElementById('todayLabel');
-  if(el)el.textContent='今天 · '+(d.getMonth()+1)+'月'+d.getDate()+'日 星期'+wd;
+  if(!el)return;
+  try{
+    const p=DaylightTime.parts();
+    const names=['日','一','二','三','四','五','六'];
+    let wd='';
+    for(let i=0;i<7;i++){if((p.weekday||'').indexOf(names[i])>=0){wd=names[i];break;}}
+    el.textContent='今天 · '+parseInt(p.month,10)+'月'+parseInt(p.day,10)+'日 星期'+wd;
+  }catch(e){
+    const d=new Date();
+    const wd=['日','一','二','三','四','五','六'][d.getDay()];
+    el.textContent='今天 · '+(d.getMonth()+1)+'月'+d.getDate()+'日 星期'+wd;
+  }
 }
 const av=document.getElementById('avatarBox');
 if(av)av.addEventListener('click',function(){
