@@ -1,52 +1,74 @@
 (function () {
-  var PROFILES_KEY = 'daylight_profiles';
-  var USER_KEY = 'daylight_user';
+  var ADM_KEY = 'daylight_admin';
+  var ADM_SESSION = 'daylight_admin_ok';
 
-  function profiles() {
-    try { return JSON.parse(localStorage.getItem(PROFILES_KEY)) || []; } catch (e) { return []; }
-  }
-  function saveProfiles(p) { localStorage.setItem(PROFILES_KEY, JSON.stringify(p)); }
-  function user() { return localStorage.getItem(USER_KEY) || ''; }
-  function setUser(n) {
-    if (n) localStorage.setItem(USER_KEY, n);
-    else localStorage.removeItem(USER_KEY);
-  }
-  function dataKey(u) { return 'daylight_data_' + encodeURIComponent(u); }
   function pinHash(pin) {
     var h = 5381;
     for (var i = 0; i < pin.length; i++) h = ((h << 5) + h + pin.charCodeAt(i)) >>> 0;
     return String(h);
   }
-  function login(name, pin) {
-    var ps = profiles();
-    var p = ps.filter(function (x) { return x.name === name; })[0];
-    if (!p) return 'notfound';
-    if (p.pin && pinHash(pin || '') !== p.pin) return 'badpin';
-    setUser(name);
-    return 'ok';
-  }
-  function enter(name, pin) {
-    var ps = profiles();
-    var isFirst = ps.length === 0;
-    if (!ps.some(function (x) { return x.name === name; })) {
-      ps.push({ name: name, pin: pin ? pinHash(pin) : '' });
-      saveProfiles(ps);
-      var key = dataKey(name);
-      if (isFirst && !localStorage.getItem(key)) {
-        var legacy = localStorage.getItem('daylight_data');
-        if (legacy) {
-          localStorage.setItem(key, legacy);
-          localStorage.removeItem('daylight_data');
-        }
-      }
-    }
-    setUser(name);
-    return name;
-  }
-  function logout() { setUser(''); }
 
-  var ADM_KEY = 'daylight_admin';
-  var ADM_SESSION = 'daylight_admin_ok';
+  function user() { return window.DaylightCloud ? DaylightCloud.email() : ''; }
+  function uid() { return window.DaylightCloud ? DaylightCloud.uid() : ''; }
+  function init() { return window.DaylightCloud ? DaylightCloud.init() : Promise.resolve(null); }
+  function login(email, password) { return window.DaylightCloud.signIn(email, password); }
+  function signup(name, email, password) { return window.DaylightCloud.signUp(name, email, password); }
+  function logout() { if (window.DaylightCloud) DaylightCloud.signOut(); }
+  function dataKey(u) { return 'daylight_data_' + u; }
+  function isAdmin() { return window.DaylightCloud ? DaylightCloud.isAdmin() : false; }
+
+  function mountLogin(overlayId, onEnter) {
+    var ov = document.getElementById(overlayId);
+    if (!ov) return;
+    ov.style.display = 'flex';
+    var submit = ov.querySelector('.login-submit');
+    var signupBtn = ov.querySelector('.login-signup');
+    var status = ov.querySelector('.login-status');
+    var nameEl = ov.querySelector('.login-name');
+    var emailEl = ov.querySelector('.login-email');
+    var passEl = ov.querySelector('.login-pass');
+    function busy(v) {
+      if (submit) submit.disabled = v;
+      if (signupBtn) signupBtn.disabled = v;
+    }
+    function enter() {
+      if (!emailEl || !passEl) return;
+      var email = emailEl.value.trim();
+      var pass = passEl.value;
+      if (!email || !pass) { if (status) status.textContent = '请输入邮箱和密码'; return; }
+      if (status) status.textContent = '登录中…';
+      busy(true);
+      login(email, pass).then(function (r) {
+        busy(false);
+        if (r.ok) { if (status) status.textContent = ''; onEnter(); }
+        else if (status) status.textContent = r.error || '登录失败';
+      });
+    }
+    function doSignup() {
+      if (!nameEl || !emailEl || !passEl) return;
+      var name = nameEl.value.trim();
+      var email = emailEl.value.trim();
+      var pass = passEl.value;
+      if (!name) { if (status) status.textContent = '请填写名字'; return; }
+      if (!email) { if (status) status.textContent = '请填写邮箱'; return; }
+      if (pass.length < 6) { if (status) status.textContent = '密码至少 6 位'; return; }
+      if (status) status.textContent = '注册中…';
+      busy(true);
+      signup(name, email, pass).then(function (r) {
+        busy(false);
+        if (r.ok) {
+          if (r.confirmed) { if (status) status.textContent = ''; onEnter(); }
+          else if (status) status.textContent = '注册成功！请到邮箱点击确认链接后登录';
+        }
+        else if (status) status.textContent = r.error || '注册失败';
+      });
+    }
+    if (submit) submit.onclick = enter;
+    if (signupBtn) signupBtn.onclick = doSignup;
+    if (emailEl) emailEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') enter(); });
+    if (passEl) passEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') enter(); });
+  }
+
   function adminGet() {
     try { return JSON.parse(localStorage.getItem(ADM_KEY)) || null; } catch (e) { return null; }
   }
@@ -61,53 +83,19 @@
   }
   function setupAdmin(pin) { adminSet(pinHash(pin)); adminUnlock(); }
 
-  function mountLogin(overlayId, onEnter) {
-    var ov = document.getElementById(overlayId);
-    if (!ov) return;
-    ov.style.display = 'flex';
-    var list = ov.querySelector('.profile-list');
-    if (list) {
-      list.innerHTML = '';
-      profiles().forEach(function (p) {
-        var el = document.createElement('div');
-        el.className = 'profile-chip';
-        el.innerHTML = '<span class="pc-avatar"></span><span></span>';
-        el.querySelector('.pc-avatar').textContent = (p.name || '?').charAt(0);
-        el.querySelector('span:last-child').textContent = p.name;
-        el.addEventListener('click', function () {
-          var pin = ov.querySelector('.login-pin').value;
-          var r = login(p.name, pin);
-          if (r === 'badpin') { window.toast ? toast('密码不对') : alert('密码不对'); return; }
-          onEnter(p.name);
-        });
-        list.appendChild(el);
-      });
-    }
-    var btn = ov.querySelector('.login-btn');
-    if (btn) {
-      btn.onclick = function () {
-        var name = ov.querySelector('.login-name').value.trim();
-        var pin = ov.querySelector('.login-pin').value;
-        if (!name) { window.toast ? toast('请输入名字') : alert('请输入名字'); return; }
-        var r = login(name, pin);
-        if (r === 'badpin') { window.toast ? toast('密码不对') : alert('密码不对'); return; }
-        enter(name, pin);
-        onEnter(name);
-      };
-    }
-  }
-
   window.DaylightAuth = {
-    profiles: profiles,
-    saveProfiles: saveProfiles,
+    profiles: function () { return []; },
+    saveProfiles: function () {},
     user: user,
-    setUser: setUser,
-    dataKey: dataKey,
-    pinHash: pinHash,
+    uid: uid,
+    init: init,
     login: login,
-    enter: enter,
+    signup: signup,
     logout: logout,
+    dataKey: dataKey,
+    isAdmin: isAdmin,
     mountLogin: mountLogin,
+    pinHash: pinHash,
     adminGet: adminGet,
     adminSet: adminSet,
     adminUnlocked: adminUnlocked,
