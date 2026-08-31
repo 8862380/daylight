@@ -17,7 +17,7 @@ body{
 }
 a{color:inherit;text-decoration:none}
 button{font-family:inherit;border:none;background:none;cursor:pointer;color:inherit}
-input{font-family:inherit}
+input,select{font-family:inherit}
 
 .deco{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
 .blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55}
@@ -40,7 +40,17 @@ input{font-family:inherit}
 .nav-links a{font-size:13px;font-weight:500;padding:7px 13px;border-radius:999px;color:var(--text2);transition:.2s}
 .nav-links a:hover,.nav-links a.active{background:var(--chip);color:var(--text)}
 .nav-right{margin-left:auto;display:flex;align-items:center;gap:12px}
-.search{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:var(--field);border:1px solid var(--card-border);font-size:13px;color:var(--text2);min-width:170px}
+.search{position:relative;display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:var(--field);border:1px solid var(--card-border);font-size:13px;color:var(--text2);min-width:200px}
+.search input{background:none;border:none;outline:none;color:var(--text);font-size:13px;width:150px}
+.search input::placeholder{color:var(--text3)}
+#searchResults{position:absolute;top:52px;right:0;width:380px;background:var(--card);border:1px solid var(--card-border);border-radius:18px;box-shadow:var(--shadow);backdrop-filter:blur(24px);overflow:hidden;z-index:90;display:none}
+#searchResults.show{display:block}
+.sr-head{padding:10px 16px;font-size:11px;font-weight:700;color:var(--text2);letter-spacing:1px;border-bottom:1px dashed var(--card-border)}
+.sr-item{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;transition:.12s}
+.sr-item:hover{background:var(--chip)}
+.sr-type{font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;flex-shrink:0}
+.sr-title{font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sr-empty{padding:18px;text-align:center;font-size:13px;color:var(--text2)}
 .avatar{width:34px;height:34px;border-radius:50%;background:var(--avatar-grad);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;box-shadow:var(--dot-shadow)}
 
 /* ---------- hero ---------- */
@@ -49,7 +59,7 @@ input{font-family:inherit}
 .hero-left{position:relative}
 .kicker{font-size:12px;font-weight:700;letter-spacing:2.2px;color:var(--accent);text-transform:uppercase;margin-bottom:10px}
 .hero h1{font-size:38px;font-weight:800;letter-spacing:-.6px}
-.hero-sub{margin-top:10px;font-size:15px;color:var(--text2);max-width:520px}
+.hero-sub{margin-top:10px;font-size:15px;color:var(--text2);max-width:560px}
 .hero-sub b{color:var(--text)}
 .hero-actions{margin-top:24px;display:flex;gap:12px}
 .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border-radius:999px;font-size:14px;font-weight:600;transition:.2s}
@@ -96,21 +106,20 @@ input{font-family:inherit}
 .task .t-title{font-size:14px;font-weight:500}
 .task .t-time{margin-left:auto;font-size:12px;color:var(--text2);flex-shrink:0}
 .task.done .t-title{color:var(--text3);text-decoration:line-through}
-.add-task{display:flex;gap:10px;margin-top:14px}
-.add-task input{flex:1;padding:11px 15px;border-radius:14px;border:1px solid var(--card-border);background:var(--field);color:var(--text);font-size:13px;outline:none}
-.add-task input:focus{border-color:var(--accent)}
-.add-task button{padding:11px 18px;border-radius:14px;background:var(--accent);color:#fff;font-size:13px;font-weight:700}
-.add-task input.flash{box-shadow:0 0 0 3px var(--accent)}
-#toast{position:fixed;left:50%;bottom:36px;transform:translateX(-50%) translateY(20px);background:rgba(23,28,47,.92);color:#fff;padding:12px 22px;border-radius:999px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:.3s;z-index:99;box-shadow:0 12px 30px rgba(0,0,0,.25)}
-#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.add-row{display:flex;gap:10px;margin-top:14px}
+.add-row input{flex:1;min-width:0;padding:11px 15px;border-radius:14px;border:1px solid var(--card-border);background:var(--field);color:var(--text);font-size:13px;outline:none}
+.add-row input:focus{border-color:var(--accent)}
+.add-row input.flash{box-shadow:0 0 0 3px var(--accent)}
+.add-row button{padding:11px 16px;border-radius:14px;background:var(--accent);color:#fff;font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer}
 
 /* work blocks */
 .block{display:flex;align-items:center;gap:14px;padding:14px 4px;border-bottom:1px dashed var(--card-border)}
 .block:last-of-type{border-bottom:none}
-.block .b-time{font-size:12px;font-weight:700;color:var(--accent);width:84px;flex-shrink:0}
+.block .b-time{font-size:12px;font-weight:700;color:var(--accent);width:96px;flex-shrink:0}
 .block .b-title{font-size:14px;font-weight:600}
 .block .b-tag{font-size:11px;color:var(--text2);margin-top:2px}
-.status{font-size:11px;font-weight:700;padding:5px 11px;border-radius:999px;margin-left:auto;flex-shrink:0}
+.status{font-size:11px;font-weight:700;padding:6px 12px;border-radius:999px;margin-left:auto;flex-shrink:0;cursor:pointer;transition:.15s;user-select:none}
+.status:hover{filter:brightness(1.08)}
 .st-done{background:var(--good-soft);color:var(--good)}
 .st-doing{background:var(--doing-soft);color:var(--doing)}
 .st-todo{background:var(--chip);color:var(--text2)}
@@ -118,19 +127,23 @@ input{font-family:inherit}
 /* goals */
 .goal{margin-bottom:18px}
 .goal:last-of-type{margin-bottom:0}
-.goal-top{display:flex;align-items:baseline;gap:8px;margin-bottom:8px}
+.goal-top{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .goal-top b{font-size:14px;font-weight:600}
-.goal-top span{margin-left:auto;font-size:12px;color:var(--text2);font-weight:600}
+.goal-top span{font-size:12px;color:var(--text2);font-weight:600;margin-left:auto;white-space:nowrap}
+.goal-ctl{display:flex;align-items:center;gap:6px;margin-left:8px}
+.gbtn{width:26px;height:26px;border-radius:50%;background:var(--chip);color:var(--text2);font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;user-select:none}
+.gbtn:hover{background:var(--accent);color:#fff}
 .bar{height:10px;border-radius:999px;background:var(--track);overflow:hidden}
 .bar i{display:block;height:100%;border-radius:999px;background:var(--bar-color)}
 
 /* expenses */
+.exp-flex{display:flex;gap:30px;align-items:center}
 .exp-row{display:flex;align-items:center;gap:13px;padding:11px 4px;border-bottom:1px dashed var(--card-border)}
 .exp-row:last-of-type{border-bottom:none}
-.exp-ico{width:36px;height:36px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;font-size:15px}
+.exp-ico{width:36px;height:36px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;font-size:15px;font-weight:700}
 .exp-name{font-size:14px;font-weight:600}
 .exp-cat{font-size:11px;color:var(--text2)}
-.exp-amt{margin-left:auto;font-size:14px;font-weight:700}
+.exp-amt{margin-left:auto;font-size:14px;font-weight:700;flex-shrink:0}
 .exp-amt small{font-size:10px;color:var(--text3);font-weight:400;display:block;text-align:right}
 .donut-side{display:flex;flex-direction:column;align-items:center;gap:16px}
 .donut{width:128px;height:128px;border-radius:50%;position:relative;flex-shrink:0}
@@ -142,16 +155,25 @@ input{font-family:inherit}
 .legend .lg{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--text2)}
 .legend .lg i{width:10px;height:10px;border-radius:4px;flex-shrink:0}
 .legend .lg span{margin-left:auto;font-weight:700;color:var(--text)}
+.add-expense{display:flex;gap:10px;margin-top:16px}
+.add-expense input{flex:1;min-width:0;padding:11px 15px;border-radius:14px;border:1px solid var(--card-border);background:var(--field);color:var(--text);font-size:13px;outline:none}
+.add-expense input:focus{border-color:var(--accent)}
+.add-expense .amt{max-width:96px;text-align:right}
+.add-expense select{padding:11px 12px;border-radius:14px;border:1px solid var(--card-border);background:var(--field);color:var(--text);font-size:13px;outline:none;cursor:pointer}
+.add-expense button{padding:11px 16px;border-radius:14px;background:var(--accent);color:#fff;font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer}
 
 /* courses */
 .course{display:flex;gap:16px;padding-bottom:16px;margin-bottom:16px;position:relative}
 .course:last-of-type{margin-bottom:0;padding-bottom:0}
 .course::before{content:"";position:absolute;left:11px;top:30px;bottom:-2px;width:2px;background:var(--card-border)}
 .course:last-of-type::before{display:none}
-.course .c-dot{width:24px;height:24px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:800;flex-shrink:0;position:relative;z-index:1}
+.course .c-dot{width:24px;height:24px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:800;flex-shrink:0;position:relative;z-index:1;cursor:pointer;transition:.15s;user-select:none}
+.course .c-dot.done{background:var(--good)}
 .course .c-time{font-size:11px;font-weight:700;color:var(--accent);letter-spacing:.3px}
 .course .c-title{font-size:14px;font-weight:600;margin-top:2px}
 .course .c-meta{font-size:12px;color:var(--text2);margin-top:3px}
+.course.done .c-title{color:var(--text3);text-decoration:line-through}
+.course .del{margin-left:auto}
 
 /* study chart */
 .chart{display:flex;align-items:flex-end;gap:14px;height:190px;padding-top:10px}
@@ -163,16 +185,55 @@ input{font-family:inherit}
 .chart-total{display:flex;gap:24px;margin-top:22px;padding-top:18px;border-top:1px dashed var(--card-border)}
 .chart-total div b{font-size:20px;font-weight:800;letter-spacing:-.4px;display:block}
 .chart-total div span{font-size:11px;color:var(--text2)}
+.add-study{display:flex;gap:10px;margin-top:16px}
+.add-study input{max-width:120px;padding:11px 15px;border-radius:14px;border:1px solid var(--card-border);background:var(--field);color:var(--text);font-size:13px;outline:none}
+.add-study button{padding:11px 16px;border-radius:14px;background:var(--accent);color:#fff;font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer}
 
-/* footer */
+/* delete / feedback */
+.del{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text3);background:var(--chip);cursor:pointer;flex-shrink:0;transition:.15s;margin-left:8px}
+.del:hover{color:#fff;background:#f43f5e}
+#toast{position:fixed;left:50%;bottom:36px;transform:translateX(-50%) translateY(20px);background:rgba(23,28,47,.92);color:#fff;padding:12px 22px;border-radius:999px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:.3s;z-index:99;box-shadow:0 12px 30px rgba(0,0,0,.25)}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.hit{animation:hit 1.4s ease}
+@keyframes hit{0%,100%{box-shadow:0 0 0 0 transparent}30%,70%{box-shadow:0 0 0 4px var(--accent)}}
+
 footer{margin-top:40px;text-align:center;font-size:12px;color:var(--text3)}
 
 @media (max-width:980px){
-  .nav-links,.search{display:none}
-  .stats{grid-template-columns:repeat(2,1fr)}
+  .nav{flex-wrap:wrap;gap:10px;padding:10px 16px;top:10px}
+  .nav-links{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-left:0}
+  .nav-links::-webkit-scrollbar{display:none}
+  .nav-right{flex:1 1 100%;order:6;display:flex;gap:10px;margin-left:0}
+  .search{flex:1;min-width:0}
+  #searchResults{width:min(380px,calc(100vw - 40px))}
+  .stats{grid-template-columns:repeat(2,1fr);gap:10px}
   .s7,.s5{grid-column:span 12}
   .hero{flex-direction:column;text-align:center;padding:32px 24px}
-  .hero-actions{justify-content:center}
+  .hero-actions{justify-content:center;flex-wrap:wrap}
+  .add-expense{flex-wrap:wrap}
+  .add-expense .amt{max-width:none}
+}
+@media (max-width:640px){
+  .wrap{padding:0 14px 48px}
+  .brand span{display:none}
+  .hero{padding:28px 20px;gap:20px}
+  .hero h1{font-size:28px}
+  .hero-sub{font-size:14px}
+  .hero-ring{width:128px;height:128px}
+  .ring{width:128px;height:128px}
+  .stat{padding:14px 12px;gap:10px}
+  .stat-ico{width:38px;height:38px;border-radius:12px}
+  .stat b{font-size:18px}
+  .card{padding:20px 16px;border-radius:20px}
+  .card-head{flex-wrap:wrap;gap:8px}
+  .exp-flex{flex-direction:column;gap:20px;align-items:stretch}
+  .donut-side{flex-direction:row;justify-content:space-around;align-items:center;width:100%}
+  .legend{flex:1;max-width:240px}
+  .block{flex-wrap:wrap}
+  .block .b-time{width:auto}
+  .chart{height:150px}
+  .add-study input{max-width:100px}
+  footer{margin-top:28px}
 }
 .s7{grid-column:span 7}
 .s5{grid-column:span 5}
@@ -226,8 +287,12 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--text3)}
       <a href="#study">学习</a>
     </nav>
     <div class="nav-right">
-      <div class="search">🔍 &nbsp;搜索日程…</div>
-      <div class="avatar">宇</div>
+      <div class="search">
+        <span>🔍</span>
+        <input id="searchInput" placeholder="搜索任务 / 工作 / 课程…" autocomplete="off">
+        <div id="searchResults"></div>
+      </div>
+      <div class="avatar" id="avatarBox">勇</div>
     </div>
   </header>
 
@@ -235,8 +300,8 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--text3)}
     <section class="hero glass" id="overview">
       <div class="hero-left">
         <div class="kicker" id="todayLabel">今天 · 8月31日 星期一</div>
-        <h1>早上好，小宇 👋</h1>
-        <p class="hero-sub">把今天过成喜欢的样子：已完成 <b id="taskCount">3 / 6</b> 项任务，专注 <b>5 小时 20 分</b>，比昨天多 <b>+12%</b>。</p>
+        <h1>欢迎来到勇勇任务栏，勇往向前，阿勇</h1>
+        <p class="hero-sub">把今天过成喜欢的样子：已完成 <b id="taskCount">3 / 6</b> 项任务，专注 <b id="focusText">5 小时 20 分</b>，比昨天多 <b>+12%</b>。</p>
         <div class="hero-actions">
           <button class="btn btn-primary" id="heroAddBtn">＋ 添加今日计划</button>
           <button class="btn btn-ghost" id="heroReportBtn">查看周报</button>
@@ -250,9 +315,9 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--text3)}
     </section>
 
     <section class="stats">
-      <div class="stat glass"><div class="stat-ico c1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><b>5h 20m</b><small>今日专注时长 <span class="delta">▲ +12%</span></small></div></div>
-      <div class="stat glass"><div class="stat-ico c2"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div><b>3 / 6</b><small>今日任务完成</small></div></div>
-      <div class="stat glass"><div class="stat-ico c3"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></div><div><b>¥52.5</b><small>今日消费 / 预算 ¥80</small></div></div>
+      <div class="stat glass"><div class="stat-ico c1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><b id="focusStat">5h 20m</b><small>今日专注时长 <span class="delta">▲ +12%</span></small></div></div>
+      <div class="stat glass"><div class="stat-ico c2"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div><b id="taskStat">3 / 6</b><small>今日任务完成</small></div></div>
+      <div class="stat glass"><div class="stat-ico c3"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></div><div><b id="expTodayStat">¥52.5</b><small>今日消费 / 预算 ¥80</small></div></div>
       <div class="stat glass"><div class="stat-ico c4"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div><div><b>12 天</b><small>连续打卡 <span class="delta">▲ 新纪录</span></small></div></div>
     </section>
 
@@ -260,153 +325,397 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--text3)}
       <article class="card glass s7" id="tasks">
         <div class="card-head">
           <div class="card-ico" style="background:linear-gradient(135deg,#6366f1,#818cf8)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
-          <div><h2>今日任务</h2><small>保持节奏，逐项击破</small></div>
+          <div><h2>今日任务</h2><small>勾选完成 · 可新增可删除</small></div>
           <div class="pill good spacer" id="taskPct2">完成 50%</div>
         </div>
         <div id="taskList"></div>
-        <div class="add-task"><input id="addInput" placeholder="添加新任务，回车即可…"><button id="addBtn">添加</button></div>
+        <div class="add-row"><input id="addInput" placeholder="添加新任务，回车即可…"><button id="addBtn">添加</button></div>
       </article>
 
       <article class="card glass s5" id="work">
         <div class="card-head">
           <div class="card-ico" style="background:linear-gradient(135deg,#f97316,#fb923c)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
-          <div><h2>今日工作</h2><small>3 个专注时段</small></div>
-          <div class="pill spacer">5h 20m</div>
+          <div><h2>今日工作</h2><small>点状态可切换 · 可增删</small></div>
+          <div class="pill spacer" id="workPill">4h 30m</div>
         </div>
-        <div class="block"><div class="b-time">09:30 – 11:00</div><div><div class="b-title">深度工作 · 需求评审</div><div class="b-tag">产品 · 会议室 A</div></div><span class="status st-done">已完成</span></div>
-        <div class="block"><div class="b-time">14:00 – 16:00</div><div><div class="b-title">Dashboard 改版设计</div><div class="b-tag">设计 · 高专注</div></div><span class="status st-doing">进行中</span></div>
-        <div class="block"><div class="b-time">20:30 – 21:30</div><div><div class="b-title">副业 · 博客更新</div><div class="b-tag">写作 · 每周五篇</div></div><span class="status st-todo">待开始</span></div>
+        <div id="workList"></div>
+        <div class="add-row"><input id="addWorkInput" placeholder="添加工作事项，回车即可…"><button id="addWorkBtn">添加</button></div>
       </article>
 
       <article class="card glass s5" id="goals">
         <div class="card-head">
           <div class="card-ico" style="background:linear-gradient(135deg,#10b981,#34d399)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
-          <div><h2>目标追踪</h2><small>月度目标 · 8 月</small></div>
-          <div class="pill spacer">年度 56%</div>
+          <div><h2>目标追踪</h2><small>用 − / + 调整进度</small></div>
+          <div class="pill spacer" id="goalPill">平均 60%</div>
         </div>
-        <div class="goal"><div class="goal-top"><b>年度阅读 48 本</b><span>27 / 48 · 56%</span></div><div class="bar" style="--bar-color:linear-gradient(90deg,#10b981,#34d399)"><i style="width:56%"></i></div></div>
-        <div class="goal"><div class="goal-top"><b>副业月收入 ¥3,000</b><span>¥1,860 · 62%</span></div><div class="bar" style="--bar-color:linear-gradient(90deg,#f97316,#fb923c)"><i style="width:62%"></i></div></div>
-        <div class="goal"><div class="goal-top"><b>减脂 8 kg</b><span>5 / 8 · 63%</span></div><div class="bar" style="--bar-color:linear-gradient(90deg,#ec4899,#f472b6)"><i style="width:63%"></i></div></div>
+        <div id="goalList"></div>
       </article>
 
       <article class="card glass s7" id="expenses">
         <div class="card-head">
           <div class="card-ico" style="background:linear-gradient(135deg,#ec4899,#f472b6)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
-          <div><h2>今日消费</h2><small>记账 · 预算 ¥80</small></div>
-          <div class="pill spacer">本月 ¥2,436 / ¥5,000</div>
+          <div><h2>今日消费</h2><small>记账 · 实时汇总</small></div>
+          <div class="pill spacer" id="expMonthPill">本月 ¥2,436 / ¥5,000</div>
         </div>
-        <div style="display:flex;gap:30px;align-items:center">
-          <div style="flex:1">
-            <div class="exp-row"><div class="exp-ico" style="background:linear-gradient(135deg,#f97316,#fb923c)">☕</div><div><div class="exp-name">咖啡 + 三明治</div><div class="exp-cat">早餐 · 餐饮</div></div><div class="exp-amt">¥18.5<small>08:10</small></div></div>
-            <div class="exp-row"><div class="exp-ico" style="background:linear-gradient(135deg,#10b981,#34d399)">🥗</div><div><div class="exp-name">轻食沙拉</div><div class="exp-cat">午餐 · 餐饮</div></div><div class="exp-amt">¥28<small>12:30</small></div></div>
-            <div class="exp-row"><div class="exp-ico" style="background:linear-gradient(135deg,#0ea5e9,#38bdf8)">🚇</div><div><div class="exp-name">地铁通勤</div><div class="exp-cat">交通</div></div><div class="exp-amt">¥6<small>09:00</small></div></div>
-            <div class="exp-row"><div class="exp-ico" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa)">🇯🇵</div><div><div class="exp-name">日语网课 · 月度订阅</div><div class="exp-cat">学习</div></div><div class="exp-amt">¥420<small>本月</small></div></div>
-          </div>
+        <div class="exp-flex">
+          <div style="flex:1;min-width:0"><div id="expenseList"></div></div>
           <div class="donut-side">
-            <div class="donut" style="background:conic-gradient(#f97316 0 38%,#8b5cf6 38% 64%,#0ea5e9 64% 76%,#10b981 76% 92%,#e2e8f0 92% 100%)">
-              <div class="donut-txt"><b>¥2,436</b><span>本月支出</span></div>
+            <div class="donut" id="expDonut" style="background:conic-gradient(#f97316 0 38%,#8b5cf6 38% 64%,#0ea5e9 64% 76%,#10b981 76% 92%,#e2e8f0 92% 100%)">
+              <div class="donut-txt"><b id="expTotal">¥2,436</b><span>本月支出</span></div>
             </div>
-            <div class="legend">
-              <div class="lg"><i style="background:#f97316"></i>餐饮 38%<span>¥926</span></div>
-              <div class="lg"><i style="background:#8b5cf6"></i>学习 26%<span>¥633</span></div>
-              <div class="lg"><i style="background:#0ea5e9"></i>交通 12%<span>¥292</span></div>
-              <div class="lg"><i style="background:#10b981"></i>生活 16%<span>¥390</span></div>
-            </div>
+            <div class="legend" id="expLegend"></div>
           </div>
+        </div>
+        <div class="add-expense">
+          <input id="expName" placeholder="记一笔，如：奶茶">
+          <input id="expAmt" class="amt" placeholder="金额" type="number" step="0.5" min="0">
+          <select id="expCat">
+            <option>餐饮</option><option>交通</option><option>学习</option><option>生活</option><option>其他</option>
+          </select>
+          <button id="expAddBtn">记账</button>
         </div>
       </article>
 
       <article class="card glass s5" id="courses">
         <div class="card-head">
           <div class="card-ico" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
-          <div><h2>课程安排</h2><small>今日 3 节 · 2h15m</small></div>
+          <div><h2>课程安排</h2><small id="courseCount">今日 3 节 · 点序号标记完成</small></div>
         </div>
-        <div class="course"><div class="c-dot">1</div><div><div class="c-time">08:00 – 08:30</div><div class="c-title">晨读英语 · 口语模仿</div><div class="c-meta">Zoom · 30 分钟</div></div></div>
-        <div class="course"><div class="c-dot">2</div><div><div class="c-time">19:30 – 20:30</div><div class="c-title">日语 N3 精读</div><div class="c-meta">网课 · 60 分钟</div></div></div>
-        <div class="course"><div class="c-dot">3</div><div><div class="c-time">21:00 – 21:45</div><div class="c-title">前端进阶 · 响应式布局</div><div class="c-meta">B站 · 45 分钟</div></div></div>
+        <div id="courseList"></div>
+        <div class="add-row"><input id="addCourseInput" placeholder="添加课程，回车即可…"><button id="addCourseBtn">添加</button></div>
       </article>
 
       <article class="card glass s7" id="study">
         <div class="card-head">
           <div class="card-ico" style="background:linear-gradient(135deg,#0ea5e9,#38bdf8)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
-          <div><h2>学习时间</h2><small>本周专注曲线</small></div>
-          <div class="pill spacer">累计 21.5h</div>
+          <div><h2>学习时间</h2><small>记录今天的学习时长</small></div>
+          <div class="pill spacer" id="studyPill">累计 21.5h</div>
         </div>
-        <div class="chart">
-          <div class="col"><div class="v" style="height:50%"></div><div class="h">2.5h</div><div class="d">周一</div></div>
-          <div class="col"><div class="v" style="height:60%"></div><div class="h">3h</div><div class="d">周二</div></div>
-          <div class="col"><div class="v" style="height:30%"></div><div class="h">1.5h</div><div class="d">周三</div></div>
-          <div class="col"><div class="v" style="height:40%"></div><div class="h">2h</div><div class="d">周四</div></div>
-          <div class="col"><div class="v" style="height:80%"></div><div class="h">4h</div><div class="d">周五</div></div>
-          <div class="col"><div class="v" style="height:100%"></div><div class="h">5h</div><div class="d">周六</div></div>
-          <div class="col"><div class="v" style="height:70%"></div><div class="h">3.5h</div><div class="d">周日</div></div>
-        </div>
+        <div class="chart" id="studyChart"></div>
         <div class="chart-total">
-          <div><b>21.5h</b><span>本周累计学习</span></div>
+          <div><b id="studyWeekTotal">21.5h</b><span>本周累计学习</span></div>
           <div><b>+18%</b><span>较上周</span></div>
-          <div><b>3.1h</b><span>日均学习</span></div>
+          <div><b id="studyAvg">3.1h</b><span>日均学习</span></div>
           <div><b>2,180</b><span>本周单词量</span></div>
+        </div>
+        <div class="add-study">
+          <input id="studyMin" placeholder="学习分钟数" type="number" min="1" max="1440">
+          <button id="studyAddBtn">＋ 记录学习</button>
         </div>
       </article>
     </section>
 
-    <footer>Daylight · 个人日程面板 — 设计灵感来自 Apple 设计语言，融合丰富色彩</footer>
+    <footer>Daylight · 个人日程面板 — 设计灵感来自 Apple 设计语言，融合丰富色彩 · <a href="admin.html" style="color:var(--accent);font-weight:600">后台管理</a></footer>
   </main>
 </div>
 <script>
 
 const THEME='cream';
-const KEY='daylight_'+THEME;
-const DEFAULT_TASKS=[
-  {t:'晨间复盘 · 15 分钟',done:true,p:'high'},
-  {t:'完成产品需求文档 v2',done:false,p:'high'},
-  {t:'健身 40 分钟',done:false,p:'med'},
-  {t:'阅读《纳瓦尔宝典》30 页',done:false,p:'low'},
-  {t:'回复团队邮件',done:true,p:'low'},
-  {t:'整理本周消费账单',done:false,p:'med'}
-];
-let tasks=[];
-try{tasks=JSON.parse(localStorage.getItem(KEY))||DEFAULT_TASKS}catch(e){tasks=DEFAULT_TASKS}
-const list=document.getElementById('taskList');
-function dotColor(p){return p==='high'?'#f43f5e':p==='med'?'#f59e0b':'#64748b'}
-function render(){
+const KEY='daylight_data';
+const CAT_COLORS={餐饮:'#f97316',学习:'#8b5cf6',交通:'#0ea5e9',生活:'#10b981',其他:'#64748b'};
+const TYPE_COLORS={任务:'#6366f1',工作:'#f97316',目标:'#10b981',消费:'#ec4899',课程:'#8b5cf6'};
+const GOAL_COLORS=[['#10b981','#34d399'],['#f97316','#fb923c'],['#ec4899','#f472b6']];
+const ST_TEXT={todo:'待开始',doing:'进行中',done:'已完成'};
+const DEFAULTS={
+  tasks:[
+    {t:'晨间复盘 · 15 分钟',done:true,p:'high'},
+    {t:'完成产品需求文档 v2',done:false,p:'high'},
+    {t:'健身 40 分钟',done:false,p:'med'},
+    {t:'阅读《纳瓦尔宝典》30 页',done:false,p:'low'},
+    {t:'回复团队邮件',done:true,p:'low'},
+    {t:'整理本周消费账单',done:false,p:'med'}
+  ],
+  work:[
+    {time:'09:30 – 11:00',title:'深度工作 · 需求评审',tag:'产品 · 会议室 A',status:'done',dur:1.5},
+    {time:'14:00 – 16:00',title:'Dashboard 改版设计',tag:'设计 · 高专注',status:'doing',dur:2},
+    {time:'20:30 – 21:30',title:'副业 · 博客更新',tag:'写作 · 每周五篇',status:'todo',dur:1}
+  ],
+  goals:[
+    {name:'年度阅读 48 本',cur:27,max:48,fmt:'num'},
+    {name:'副业月收入 ¥3,000',cur:1860,max:3000,fmt:'money'},
+    {name:'减脂 8 kg',cur:5,max:8,fmt:'num'}
+  ],
+  monthlyBase:{餐饮:879.5,学习:213,交通:286,生活:390,其他:195},
+  expenses:[
+    {name:'咖啡 + 三明治',cat:'餐饮',amt:18.5,time:'08:10',monthly:false},
+    {name:'轻食沙拉',cat:'餐饮',amt:28,time:'12:30',monthly:false},
+    {name:'地铁通勤',cat:'交通',amt:6,time:'09:00',monthly:false},
+    {name:'日语网课 · 月度订阅',cat:'学习',amt:420,time:'本月',monthly:true}
+  ],
+  courses:[
+    {time:'08:00 – 08:30',title:'晨读英语 · 口语模仿',meta:'Zoom · 30 分钟',done:false},
+    {time:'19:30 – 20:30',title:'日语 N3 精读',meta:'网课 · 60 分钟',done:false},
+    {time:'21:00 – 21:45',title:'前端进阶 · 响应式布局',meta:'B站 · 45 分钟',done:false}
+  ],
+  study:[{d:'周一',h:2.5},{d:'周二',h:3},{d:'周三',h:1.5},{d:'周四',h:2},{d:'周五',h:4},{d:'周六',h:5},{d:'周日',h:3.5}]
+};
+let S=load();
+function load(){
+  try{
+    const raw=localStorage.getItem(KEY);
+    if(raw)return mergeData(JSON.parse(raw));
+    for(const legacy of ['daylight_sunrise','daylight_midnight','daylight_cream']){
+      const old=localStorage.getItem(legacy);
+      if(old){
+        try{const s=mergeData(JSON.parse(old));save();return s;}catch(e){}
+      }
+    }
+  }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULTS));
+}
+function mergeData(p){
+  const s=JSON.parse(JSON.stringify(DEFAULTS));
+  for(const k of Object.keys(DEFAULTS)){
+    if(p[k]){
+      if(typeof p[k]==='object'&&!Array.isArray(p[k]))Object.assign(s[k],p[k]);
+      else s[k]=p[k];
+    }
+  }
+  return s;
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function fmtN(n){return Number.isInteger(n)?String(n):n.toFixed(1)}
+function money(n){return '¥'+Number(n).toLocaleString('zh-CN',{maximumFractionDigits:2})}
+function durText(h){const hh=Math.floor(h);const mm=Math.round((h-hh)*60);if(hh===0)return mm+'m';if(mm===0)return hh+'h';return hh+'h '+mm+'m'}
+function focusCN(h){const hh=Math.floor(h);const mm=Math.round((h-hh)*60);if(hh===0)return mm+' 分钟';if(mm===0)return hh+' 小时';return hh+' 小时 '+mm+' 分'}
+
+function renderTasks(){
+  const list=document.getElementById('taskList');
   list.innerHTML='';
-  tasks.forEach((tk,i)=>{
+  S.tasks.forEach((tk,i)=>{
     const row=document.createElement('label');
     row.className='task'+(tk.done?' done':'');
-    const cb=document.createElement('input');
-    cb.type='checkbox';cb.checked=tk.done;
-    cb.addEventListener('change',()=>{tasks[i].done=cb.checked;save();render();});
-    const dot=document.createElement('span');dot.className='dot';dot.style.background=dotColor(tk.p);
+    const cb=document.createElement('input');cb.type='checkbox';cb.checked=tk.done;
+    cb.addEventListener('change',()=>{S.tasks[i].done=cb.checked;save();renderTasks();});
+    const dot=document.createElement('span');dot.className='dot';dot.style.background=tk.p==='high'?'#f43f5e':tk.p==='med'?'#f59e0b':'#64748b';
     const title=document.createElement('span');title.className='t-title';title.textContent=tk.t;
     const time=document.createElement('span');time.className='t-time';time.textContent=tk.p==='high'?'高优先级':tk.p==='med'?'中优先级':'低优先级';
-    row.append(cb,dot,title,time);
+    const del=document.createElement('span');del.className='del';del.textContent='✕';
+    del.addEventListener('click',()=>{S.tasks.splice(i,1);save();renderTasks();toast('已删除');});
+    row.append(cb,dot,title,time,del);
     list.appendChild(row);
   });
-  const done=tasks.filter(t=>t.done).length;
-  document.getElementById('taskCount').textContent=done+' / '+tasks.length;
-  const pct=Math.round(done/tasks.length*100);
+  const done=S.tasks.filter(t=>t.done).length;
+  const pct=S.tasks.length?Math.round(done/S.tasks.length*100):0;
+  document.getElementById('taskCount').textContent=done+' / '+S.tasks.length;
+  document.getElementById('taskStat').textContent=done+' / '+S.tasks.length;
   document.getElementById('taskPct').textContent=pct+'%';
   document.getElementById('taskPct2').textContent='完成 '+pct+'%';
-  const ring=document.getElementById('heroRing');
-  if(ring)ring.style.setProperty('--p',pct+'%');
+  document.getElementById('heroRing').style.setProperty('--p',pct+'%');
 }
-function save(){localStorage.setItem(KEY,JSON.stringify(tasks))}
-document.getElementById('addBtn').addEventListener('click',addTask);
-document.getElementById('addInput').addEventListener('keydown',e=>{if(e.key==='Enter')addTask()});
+function renderWork(){
+  const list=document.getElementById('workList');
+  list.innerHTML='';
+  S.work.forEach((w,i)=>{
+    const row=document.createElement('div');row.className='block';
+    row.innerHTML='<div class="b-time">'+esc(w.time)+'</div><div style="min-width:0"><div class="b-title">'+esc(w.title)+'</div><div class="b-tag">'+esc(w.tag)+'</div></div><span class="status st-'+w.status+'">'+ST_TEXT[w.status]+'</span><span class="del">✕</span>';
+    row.querySelector('.status').addEventListener('click',()=>{
+      S.work[i].status=w.status==='todo'?'doing':w.status==='doing'?'done':'todo';
+      save();renderWork();toast('状态 → '+ST_TEXT[S.work[i].status]);
+    });
+    row.querySelector('.del').addEventListener('click',()=>{S.work.splice(i,1);save();renderWork();toast('已删除');});
+    list.appendChild(row);
+  });
+  const total=S.work.reduce((a,w)=>a+(w.dur||0),0);
+  document.getElementById('workPill').textContent=durText(total);
+  document.getElementById('focusStat').textContent=durText(total);
+  const hf=document.getElementById('focusText');
+  if(hf)hf.textContent=focusCN(total);
+}
+function renderGoals(){
+  const list=document.getElementById('goalList');
+  list.innerHTML='';
+  let avg=0;
+  S.goals.forEach((g,i)=>{
+    const pct=Math.round(g.cur/g.max*100);
+    avg+=pct;
+    const valText=g.fmt==='money'?money(g.cur)+' / '+money(g.max):fmtN(g.cur)+' / '+g.max;
+    const row=document.createElement('div');row.className='goal';
+    const gid='gb'+i;
+    row.innerHTML='<div class="goal-top"><b>'+esc(g.name)+'</b><span>'+valText+' · '+pct+'%</span></div><div class="bar"><i id="'+gid+'" style="width:'+pct+'%;background:linear-gradient(90deg,'+GOAL_COLORS[i%3][0]+','+GOAL_COLORS[i%3][1]+')"></i></div>';
+    const ctl=document.createElement('div');ctl.className='goal-ctl';
+    const minus=document.createElement('span');minus.className='gbtn';minus.textContent='−';
+    const plus=document.createElement('span');plus.className='gbtn';plus.textContent='+';
+    const step=g.fmt==='money'?100:1;
+    minus.addEventListener('click',()=>{S.goals[i].cur=Math.max(0,Math.round((S.goals[i].cur-step)*10)/10);save();renderGoals();toast('已更新');});
+    plus.addEventListener('click',()=>{S.goals[i].cur=Math.min(g.max,Math.round((S.goals[i].cur+step)*10)/10);save();renderGoals();toast('已更新');});
+    row.querySelector('.goal-top').appendChild(ctl);
+    ctl.append(minus,plus);
+    list.appendChild(row);
+  });
+  document.getElementById('goalPill').textContent='平均 '+(S.goals.length?Math.round(avg/S.goals.length):0)+'%';
+}
+function catTotals(){
+  const t=Object.assign({},S.monthlyBase);
+  S.expenses.forEach(e=>{t[e.cat]=(t[e.cat]||0)+e.amt;});
+  return t;
+}
+function renderExpenses(){
+  const list=document.getElementById('expenseList');
+  list.innerHTML='';
+  S.expenses.forEach((e,i)=>{
+    const row=document.createElement('div');row.className='exp-row';
+    row.innerHTML='<div class="exp-ico" style="background:'+CAT_COLORS[e.cat]+'">'+esc(e.cat[0])+'</div><div style="min-width:0"><div class="exp-name">'+esc(e.name)+'</div><div class="exp-cat">'+esc(e.cat)+(e.monthly?' · 月度':'')+'</div></div><div class="exp-amt">'+money(e.amt)+'<small>'+esc(e.time)+'</small></div><span class="del">✕</span>';
+    row.querySelector('.del').addEventListener('click',()=>{S.expenses.splice(i,1);save();renderExpenses();toast('已删除');});
+    list.appendChild(row);
+  });
+  const today=S.expenses.filter(e=>!e.monthly).reduce((a,e)=>a+e.amt,0);
+  document.getElementById('expTodayStat').textContent=money(today);
+  const t=catTotals();
+  const total=Object.values(t).reduce((a,b)=>a+b,0);
+  document.getElementById('expTotal').textContent=money(total);
+  document.getElementById('expMonthPill').textContent='本月 '+money(total)+' / ¥5,000';
+  let acc=0;const segs=[];
+  ['餐饮','学习','交通','生活','其他'].forEach(cat=>{
+    const v=t[cat]||0;
+    if(v<=0)return;
+    const p=v/total*100;
+    segs.push(CAT_COLORS[cat]+' '+acc.toFixed(2)+'% '+(acc+p).toFixed(2)+'%');
+    acc+=p;
+  });
+  document.getElementById('expDonut').style.background='conic-gradient('+segs.join(',')+')';
+  const lg=document.getElementById('expLegend');
+  lg.innerHTML='';
+  ['餐饮','学习','交通','生活','其他'].forEach(cat=>{
+    const v=t[cat]||0;
+    if(v<=0)return;
+    const p=Math.round(v/total*100);
+    const el=document.createElement('div');el.className='lg';
+    el.innerHTML='<i style="background:'+CAT_COLORS[cat]+'"></i>'+cat+' '+p+'%<span>'+money(v)+'</span>';
+    lg.appendChild(el);
+  });
+}
+function renderCourses(){
+  const list=document.getElementById('courseList');
+  list.innerHTML='';
+  S.courses.forEach((c,i)=>{
+    const row=document.createElement('div');row.className='course'+(c.done?' done':'');
+    const dot=document.createElement('div');dot.className='c-dot'+(c.done?' done':'');dot.textContent=c.done?'✓':(i+1);
+    dot.title='点击切换完成状态';
+    dot.addEventListener('click',()=>{S.courses[i].done=!c.done;save();renderCourses();toast(c.done?'已标记完成 ✓':'已取消完成');});
+    const info=document.createElement('div');
+    info.innerHTML='<div class="c-time">'+esc(c.time)+'</div><div class="c-title">'+esc(c.title)+'</div><div class="c-meta">'+esc(c.meta)+'</div>';
+    const del=document.createElement('span');del.className='del';del.textContent='✕';
+    del.addEventListener('click',()=>{S.courses.splice(i,1);save();renderCourses();toast('已删除');});
+    row.append(dot,info,del);
+    list.appendChild(row);
+  });
+  document.getElementById('courseCount').textContent='今日 '+S.courses.length+' 节';
+}
+function renderStudy(){
+  const chart=document.getElementById('studyChart');
+  chart.innerHTML='';
+  const max=5;
+  S.study.forEach(s=>{
+    const col=document.createElement('div');col.className='col';
+    col.innerHTML='<div class="v" style="height:'+Math.round(s.h/max*100)+'%"></div><div class="h">'+fmtN(s.h)+'h</div><div class="d">'+s.d+'</div>';
+    chart.appendChild(col);
+  });
+  const total=S.study.reduce((a,s)=>a+s.h,0);
+  document.getElementById('studyPill').textContent='累计 '+fmtN(total)+'h';
+  document.getElementById('studyWeekTotal').textContent=fmtN(total)+'h';
+  document.getElementById('studyAvg').textContent=(total/S.study.length).toFixed(1)+'h';
+}
+
 function addTask(){
   const inp=document.getElementById('addInput');
   const v=inp.value.trim();if(!v)return;
-  tasks.push({t:v,done:false,p:'med'});
-  inp.value='';save();render();toast('已添加 ✓');
+  S.tasks.push({t:v,done:false,p:'med'});
+  inp.value='';save();renderTasks();toast('已添加 ✓');
 }
-document.getElementById('heroAddBtn').addEventListener('click',()=>{
+function addWork(){
+  const inp=document.getElementById('addWorkInput');
+  const v=inp.value.trim();if(!v)return;
+  S.work.push({time:'灵活时段',title:v,tag:'自定义',status:'todo',dur:1});
+  inp.value='';save();renderWork();toast('已添加 ✓');
+}
+function addExpense(){
+  const n=document.getElementById('expName').value.trim();
+  const a=parseFloat(document.getElementById('expAmt').value);
+  if(!n||isNaN(a)||a<=0){toast('请填写名称和金额');return;}
+  const cat=document.getElementById('expCat').value;
+  const d=new Date();
+  const hh=String(d.getHours()).padStart(2,'0');
+  const mm=String(d.getMinutes()).padStart(2,'0');
+  S.expenses.push({name:n,cat:cat,amt:a,time:hh+':'+mm,monthly:false});
+  document.getElementById('expName').value='';
+  document.getElementById('expAmt').value='';
+  save();renderExpenses();toast('已记账 ✓');
+}
+function addCourse(){
+  const inp=document.getElementById('addCourseInput');
+  const v=inp.value.trim();if(!v)return;
+  S.courses.push({time:'--:--',title:v,meta:'自定义',done:false});
+  inp.value='';save();renderCourses();toast('已添加 ✓');
+}
+function addStudy(){
+  const min=parseFloat(document.getElementById('studyMin').value);
+  if(isNaN(min)||min<=0||min>1440){toast('请输入有效的分钟数');return;}
+  const idx=new Date().getDay();
+  const dayIdx=idx===0?6:idx-1;
+  S.study[dayIdx].h=Math.round((S.study[dayIdx].h+min/60)*10)/10;
+  document.getElementById('studyMin').value='';
+  save();renderStudy();toast('已记录 '+Math.round(min)+' 分钟学习 ✓');
+}
+
+function searchItems(q){
+  q=q.toLowerCase();const out=[];
+  S.tasks.forEach(t=>{if(t.t.toLowerCase().includes(q))out.push({sid:'tasks',type:'任务',title:t.t});});
+  S.work.forEach(w=>{if((w.title+' '+w.tag).toLowerCase().includes(q))out.push({sid:'work',type:'工作',title:w.title+' · '+w.tag});});
+  S.goals.forEach(g=>{if(g.name.toLowerCase().includes(q))out.push({sid:'goals',type:'目标',title:g.name});});
+  S.expenses.forEach(e=>{if((e.name+' '+e.cat).toLowerCase().includes(q))out.push({sid:'expenses',type:'消费',title:e.name+' · '+e.cat});});
+  S.courses.forEach(c=>{if((c.title+' '+c.meta).toLowerCase().includes(q))out.push({sid:'courses',type:'课程',title:c.title});});
+  return out.slice(0,8);
+}
+function renderSearch(q){
+  const box=document.getElementById('searchResults');
+  if(!q){box.classList.remove('show');box.innerHTML='';return;}
+  const items=searchItems(q);
+  if(!items.length){
+    box.innerHTML='<div class="sr-empty">没有找到 “'+esc(q)+'” 相关内容</div>';
+    box.classList.add('show');return;
+  }
+  box.innerHTML='<div class="sr-head">找到 '+items.length+' 条结果，点击跳转</div>';
+  items.forEach(it=>{
+    const el=document.createElement('div');el.className='sr-item';
+    el.innerHTML='<span class="sr-type" style="background:'+TYPE_COLORS[it.type]+'22;color:'+TYPE_COLORS[it.type]+'">'+it.type+'</span><span class="sr-title">'+esc(it.title)+'</span>';
+    el.addEventListener('click',()=>jumpTo(it.sid));
+    box.appendChild(el);
+  });
+  box.classList.add('show');
+}
+function jumpTo(sid){
+  const box=document.getElementById('searchResults');
+  box.classList.remove('show');
+  const sec=document.getElementById(sid);
+  if(sec){
+    sec.scrollIntoView({behavior:'smooth',block:'start'});
+    sec.classList.remove('hit');void sec.offsetWidth;sec.classList.add('hit');
+  }
+}
+
+function wire(id,fn){const el=document.getElementById(id);if(el)el.addEventListener('click',fn);}
+function wireEnter(id,fn){const el=document.getElementById(id);if(el)el.addEventListener('keydown',e=>{if(e.key==='Enter')fn()});}
+wire('addBtn',addTask);wireEnter('addInput',addTask);
+wire('addWorkBtn',addWork);wireEnter('addWorkInput',addWork);
+wire('expAddBtn',addExpense);wireEnter('expAmt',addExpense);
+wire('addCourseBtn',addCourse);wireEnter('addCourseInput',addCourse);
+wire('studyAddBtn',addStudy);wireEnter('studyMin',addStudy);
+wire('heroAddBtn',()=>{
   document.getElementById('tasks').scrollIntoView({behavior:'smooth',block:'start'});
   setTimeout(()=>{const i=document.getElementById('addInput');i.focus();i.classList.add('flash');setTimeout(()=>i.classList.remove('flash'),900);},520);
 });
-document.getElementById('heroReportBtn').addEventListener('click',()=>{
-  document.getElementById('study').scrollIntoView({behavior:'smooth',block:'start'});
+wire('heroReportBtn',()=>{document.getElementById('study').scrollIntoView({behavior:'smooth',block:'start'});});
+
+const si=document.getElementById('searchInput');
+si.addEventListener('input',()=>renderSearch(si.value.trim()));
+si.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){document.getElementById('searchResults').classList.remove('show');}
+  if(e.key==='Enter'){const items=searchItems(si.value.trim());if(items.length)jumpTo(items[0].sid);}
 });
+si.addEventListener('blur',()=>setTimeout(()=>document.getElementById('searchResults').classList.remove('show'),160));
+
 let toastTimer=null;
 function toast(msg){
   let el=document.getElementById('toast');
@@ -414,7 +723,8 @@ function toast(msg){
   el.textContent=msg;el.classList.add('show');
   clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),1800);
 }
-render();
+
+renderTasks();renderWork();renderGoals();renderExpenses();renderCourses();renderStudy();
 const d=new Date();
 const wd=['日','一','二','三','四','五','六'][d.getDay()];
 const el=document.getElementById('todayLabel');
