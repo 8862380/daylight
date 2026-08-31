@@ -64,6 +64,21 @@ h1{font-size:22px;font-weight:800;letter-spacing:-.4px}
 .edit-form label{font-size:12px;color:#5b6478;display:flex;align-items:center;gap:5px}
 #toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(20px);background:rgba(23,28,47,.92);color:#fff;padding:11px 20px;border-radius:999px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:.3s;z-index:99}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#loginOverlay{position:fixed;inset:0;background:rgba(15,20,40,.45);backdrop-filter:blur(18px);display:none;align-items:center;justify-content:center;z-index:200;padding:20px}
+.login-card{width:min(380px,92vw);background:rgba(255,255,255,.92);border:1px solid rgba(255,255,255,.95);border-radius:28px;padding:30px 26px;text-align:center;box-shadow:0 30px 80px rgba(20,30,80,.35)}
+.login-icon{width:72px;height:72px;margin:0 auto 14px;border-radius:20px;background:linear-gradient(135deg,#6366f1,#8b5cf6,#f472b6);position:relative}
+.login-icon::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:34px;font-weight:800}
+.login-card h2{font-size:22px;font-weight:800;letter-spacing:-.4px;color:#171c2f}
+.login-card>p{font-size:13px;color:#5b6478;margin:6px 0 18px}
+.profile-list{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:16px;max-height:150px;overflow-y:auto}
+.profile-chip{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:#eef0f8;cursor:pointer;font-size:13px;font-weight:600;color:#3d465c;transition:.15s}
+.profile-chip:hover{background:#e2e6f5}
+.pc-avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}
+.login-fields{display:flex;flex-direction:column;gap:10px}
+.login-fields input{padding:12px 16px;border-radius:14px;border:1px solid #e3e8f2;background:#f7f9fe;font-size:14px;outline:none;text-align:center;color:#171c2f}
+.login-fields input:focus{border-color:#6366f1}
+.login-btn{padding:13px;border-radius:14px;border:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:14px;font-weight:700;cursor:pointer}
+.user-chip{font-size:12px;font-weight:700;padding:8px 14px;border-radius:999px;background:#e9ecf5;color:#5b6478;align-self:center}
 @media (max-width:700px){
   .stats{grid-template-columns:repeat(3,1fr)}
   .study-grid{grid-template-columns:repeat(4,1fr)}
@@ -72,10 +87,25 @@ h1{font-size:22px;font-weight:800;letter-spacing:-.4px}
 </style>
 </head>
 <body>
+<div id="loginOverlay">
+  <div class="login-card">
+    <div class="login-icon"></div>
+    <h2>勇勇任务栏</h2>
+    <p>选择或创建你的个人空间</p>
+    <div class="profile-list"></div>
+    <div class="login-fields">
+      <input class="login-name" placeholder="你的名字" autocomplete="off">
+      <input class="login-pin" type="password" placeholder="4 位密码（可选）" maxlength="4" inputmode="numeric">
+      <button class="login-btn">登录 / 创建</button>
+    </div>
+  </div>
+</div>
 <div class="wrap">
   <div class="top">
     <div class="logo"><span class="dot"></span>Daylight · 后台管理</div>
     <div class="top-actions">
+      <span class="user-chip" id="currentUser"></span>
+      <button class="btn" id="logoutBtn">退出</button>
       <a class="btn" href="index.html">← 返回站点</a>
       <button class="btn" id="exportBtn">导出数据</button>
       <button class="btn" id="importBtn">导入数据</button>
@@ -168,8 +198,10 @@ h1{font-size:22px;font-weight:800;letter-spacing:-.4px}
   </div>
 </div>
 <div id="toast"></div>
+<script src="auth.js"></script>
 <script>
-const KEY='daylight_data';
+const USER=DaylightAuth.user();
+const KEY=DaylightAuth.dataKey(USER);
 const CATS=['餐饮','学习','交通','生活','其他'];
 const CAT_COLORS={餐饮:'#f97316',学习:'#8b5cf6',交通:'#0ea5e9',生活:'#10b981',其他:'#64748b'};
 const DEFAULTS={
@@ -229,7 +261,7 @@ function merge(s,p){
   }
   return s;
 }
-function save(s){localStorage.setItem(KEY,JSON.stringify(s||S));}
+function save(s){if(!USER)return;localStorage.setItem(KEY,JSON.stringify(s||S));}
 function esc(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function money(n){return '¥'+Number(n).toLocaleString('zh-CN',{maximumFractionDigits:2});}
 let toastTimer=null;
@@ -493,7 +525,15 @@ document.getElementById('resetBtn').addEventListener('click',()=>{
     S=fresh();save();renderAll();toast('已恢复默认');
   }
 });
-renderAll();
+if(USER){
+  document.getElementById('currentUser').textContent='当前用户：'+USER;
+  renderAll();
+}else{
+  DaylightAuth.mountLogin('loginOverlay',function(){location.reload();});
+}
+document.getElementById('logoutBtn').addEventListener('click',function(){
+  DaylightAuth.logout();location.reload();
+});
 </script>
 <script>
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){});}
