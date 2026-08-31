@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Daylight · 个人日程面板 — 三套主题对版</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#6366f1">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="勇勇任务栏">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body{
@@ -91,5 +97,8 @@
 
   <footer>Daylight · 个人日程面板 — 设计灵感来自 Apple 设计语言，融合丰富色彩 · <a href="admin.html" style="color:#6366f1;font-weight:600">后台管理</a></footer>
 </div>
+<script>
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){});}
+</script>
 </body>
 </html>
