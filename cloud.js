@@ -1,7 +1,7 @@
 (function () {
   var URL = 'https://upvjucspjcobqkoxmzli.supabase.co';
   var ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVwdmp1Y3NwamNvYnFrb3htemxpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2NjI0MDUsImV4cCI6MjEwMzIzODQwNX0.ZtsE985-71TVp3bSTiOmHnjfTFkm-B4l7OtLA3_u-TU';
-  var ADMIN_EMAIL = ''; // 管理员邮箱（填好后后台可看全部用户）
+  var ADMIN_EMAIL = '2092307480@qq.com';
   var SESSION_KEY = 'daylight_sb_session';
 
   function getSession() {
