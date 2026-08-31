@@ -118,10 +118,9 @@ h1{font-size:22px;font-weight:800;letter-spacing:-.4px}
   <div class="login-card">
     <div class="login-icon"></div>
     <h2>勇勇任务栏</h2>
-    <p>邮箱登录 · 数据云端同步</p>
+    <p>用户名登录 · 数据云端同步</p>
     <div class="login-fields">
-      <input class="login-name" placeholder="你的名字（注册时填）" autocomplete="off">
-      <input class="login-email" type="email" placeholder="邮箱" autocomplete="email">
+      <input class="login-id" placeholder="用户名（管理员可填邮箱）" autocomplete="username">
       <input class="login-pass" type="password" placeholder="密码（至少 6 位）" autocomplete="current-password">
       <button class="login-submit">登录</button>
       <button class="login-signup ghost">注册新账号</button>
@@ -660,7 +659,7 @@ document.getElementById('resetBtn').addEventListener('click',()=>{
 function bootAdmin(){
   document.getElementById('adminGate').style.display='none';
   document.getElementById('adminWrap').style.display='block';
-  USER=DaylightAuth.user();
+  USER=DaylightAuth.displayName();
   if(USER){
     KEY=DaylightAuth.dataKey(DaylightAuth.uid());
     S=load();
