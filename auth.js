@@ -45,6 +45,22 @@
   }
   function logout() { setUser(''); }
 
+  var ADM_KEY = 'daylight_admin';
+  var ADM_SESSION = 'daylight_admin_ok';
+  function adminGet() {
+    try { return JSON.parse(localStorage.getItem(ADM_KEY)) || null; } catch (e) { return null; }
+  }
+  function adminSet(h) { localStorage.setItem(ADM_KEY, JSON.stringify({ h: h })); }
+  function adminUnlocked() { return sessionStorage.getItem(ADM_SESSION) === '1'; }
+  function adminUnlock() { sessionStorage.setItem(ADM_SESSION, '1'); }
+  function adminLock() { sessionStorage.removeItem(ADM_SESSION); }
+  function verifyAdmin(pin) {
+    var c = adminGet();
+    if (!c) return 'nosetup';
+    return pinHash(pin || '') === c.h ? 'ok' : 'badpin';
+  }
+  function setupAdmin(pin) { adminSet(pinHash(pin)); adminUnlock(); }
+
   function mountLogin(overlayId, onEnter) {
     var ov = document.getElementById(overlayId);
     if (!ov) return;
@@ -91,5 +107,12 @@
     enter: enter,
     logout: logout,
     mountLogin: mountLogin,
+    adminGet: adminGet,
+    adminSet: adminSet,
+    adminUnlocked: adminUnlocked,
+    adminUnlock: adminUnlock,
+    adminLock: adminLock,
+    verifyAdmin: verifyAdmin,
+    setupAdmin: setupAdmin,
   };
 })();
