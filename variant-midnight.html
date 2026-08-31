@@ -205,6 +205,23 @@ input,select{font-family:inherit}
 
 footer{margin-top:40px;text-align:center;font-size:12px;color:var(--text3)}
 
+/* ---------- login overlay ---------- */
+#loginOverlay{position:fixed;inset:0;background:rgba(15,20,40,.45);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);display:none;align-items:center;justify-content:center;z-index:200;padding:20px}
+.login-card{width:min(380px,92vw);background:rgba(255,255,255,.92);border:1px solid rgba(255,255,255,.95);border-radius:28px;padding:30px 26px;text-align:center;box-shadow:0 30px 80px rgba(20,30,80,.35)}
+.login-icon{width:72px;height:72px;margin:0 auto 14px;border-radius:20px;background:linear-gradient(135deg,#6366f1,#8b5cf6,#f472b6);position:relative;box-shadow:0 12px 28px rgba(99,102,241,.4)}
+.login-icon::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:34px;font-weight:800}
+.login-card h2{font-size:22px;font-weight:800;letter-spacing:-.4px;color:#171c2f}
+.login-card>p{font-size:13px;color:#5b6478;margin:6px 0 18px}
+.profile-list{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:16px;max-height:150px;overflow-y:auto}
+.profile-chip{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:#eef0f8;cursor:pointer;font-size:13px;font-weight:600;color:#3d465c;transition:.15s}
+.profile-chip:hover{background:#e2e6f5}
+.pc-avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}
+.login-fields{display:flex;flex-direction:column;gap:10px}
+.login-fields input{padding:12px 16px;border-radius:14px;border:1px solid #e3e8f2;background:#f7f9fe;font-size:14px;outline:none;text-align:center;color:#171c2f}
+.login-fields input:focus{border-color:#6366f1}
+.login-btn{padding:13px;border-radius:14px;border:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:14px;font-weight:700;cursor:pointer}
+.avatar{cursor:pointer}
+
 @media (max-width:980px){
   .nav{flex-wrap:wrap;gap:10px;padding:10px 16px;top:10px}
   .nav-links{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-left:0}
@@ -280,6 +297,19 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--text3)}
 </style>
 </head>
 <body>
+<div id="loginOverlay">
+  <div class="login-card">
+    <div class="login-icon"></div>
+    <h2>勇勇任务栏</h2>
+    <p>选择或创建你的个人空间</p>
+    <div class="profile-list"></div>
+    <div class="login-fields">
+      <input class="login-name" placeholder="你的名字" autocomplete="off">
+      <input class="login-pin" type="password" placeholder="4 位密码（可选）" maxlength="4" inputmode="numeric">
+      <button class="login-btn">登录 / 创建</button>
+    </div>
+  </div>
+</div>
 <div class="deco"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
 <div class="app">
   <header class="nav glass">
@@ -415,10 +445,12 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--text3)}
     <footer>Daylight · 个人日程面板 — 设计灵感来自 Apple 设计语言，融合丰富色彩 · <a href="admin.html" style="color:var(--accent);font-weight:600">后台管理</a></footer>
   </main>
 </div>
+<script src="auth.js"></script>
 <script>
 
 const THEME='midnight';
-const KEY='daylight_data';
+const USER=DaylightAuth.user();
+const KEY=DaylightAuth.dataKey(USER);
 const CAT_COLORS={餐饮:'#f97316',学习:'#8b5cf6',交通:'#0ea5e9',生活:'#10b981',其他:'#64748b'};
 const TYPE_COLORS={任务:'#6366f1',工作:'#f97316',目标:'#10b981',消费:'#ec4899',课程:'#8b5cf6'};
 const GOAL_COLORS=[['#10b981','#34d399'],['#f97316','#fb923c'],['#ec4899','#f472b6']];
@@ -480,7 +512,7 @@ function mergeData(p){
   }
   return s;
 }
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function save(){try{if(USER)localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function fmtN(n){return Number.isInteger(n)?String(n):n.toFixed(1)}
 function money(n){return '¥'+Number(n).toLocaleString('zh-CN',{maximumFractionDigits:2})}
@@ -731,11 +763,23 @@ function toast(msg){
   clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),1800);
 }
 
-renderTasks();renderWork();renderGoals();renderExpenses();renderCourses();renderStudy();
-const d=new Date();
-const wd=['日','一','二','三','四','五','六'][d.getDay()];
-const el=document.getElementById('todayLabel');
-if(el)el.textContent='今天 · '+(d.getMonth()+1)+'月'+d.getDate()+'日 星期'+wd;
+function dateLabel(){
+  const d=new Date();
+  const wd=['日','一','二','三','四','五','六'][d.getDay()];
+  const el=document.getElementById('todayLabel');
+  if(el)el.textContent='今天 · '+(d.getMonth()+1)+'月'+d.getDate()+'日 星期'+wd;
+}
+const av=document.getElementById('avatarBox');
+if(av)av.addEventListener('click',function(){
+  if(confirm('退出登录并切换账号？')){
+    DaylightAuth.logout();location.reload();
+  }
+});
+if(USER){
+  renderTasks();renderWork();renderGoals();renderExpenses();renderCourses();renderStudy();dateLabel();
+}else{
+  DaylightAuth.mountLogin('loginOverlay',function(){location.reload();});
+}
 
 </script>
 <script>
