@@ -450,7 +450,7 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--text3)}
 const THEME='cream';
 const USER=DaylightAuth.user();
 const KEY=DaylightAuth.dataKey(USER);
-const EDIT=DaylightAuth.adminUnlocked();
+const EDIT=true;
 const CAT_COLORS={餐饮:'#f97316',学习:'#8b5cf6',交通:'#0ea5e9',生活:'#10b981',其他:'#64748b'};
 const TYPE_COLORS={任务:'#6366f1',工作:'#f97316',目标:'#10b981',消费:'#ec4899',课程:'#8b5cf6'};
 const GOAL_COLORS=[['#10b981','#34d399'],['#f97316','#fb923c'],['#ec4899','#f472b6']];
@@ -793,32 +793,10 @@ function dateLabel(){
   const el=document.getElementById('todayLabel');
   if(el)el.textContent='今天 · '+(d.getMonth()+1)+'月'+d.getDate()+'日 星期'+wd;
 }
-if(!EDIT){
-  document.querySelectorAll('.add-row,.add-expense,.add-study').forEach(function(el){el.style.display='none';});
-  const hb=document.getElementById('heroAddBtn');
-  if(hb)hb.style.display='none';
-}
-let clickN=0,clickT=0;
 const av=document.getElementById('avatarBox');
 if(av)av.addEventListener('click',function(){
-  const now=Date.now();
-  if(now-clickT>2000)clickN=0;
-  clickT=now;clickN++;
-  if(clickN>=5){
-    clickN=0;
-    const cfg=DaylightAuth.adminGet();
-    if(!cfg){
-      const v=prompt('首次使用：设置开发者密码（至少 4 位）');
-      if(v&&v.length>=4){
-        const v2=prompt('再次输入确认');
-        if(v===v2){DaylightAuth.setupAdmin(v);location.reload();}
-        else toast('两次输入不一致');
-      }
-    }else{
-      const v=prompt('输入开发者密码');
-      if(v&&DaylightAuth.verifyAdmin(v)==='ok'){DaylightAuth.adminUnlock();location.reload();}
-      else toast('密码错误');
-    }
+  if(confirm('退出登录并切换账号？')){
+    DaylightAuth.logout();location.reload();
   }
 });
 const ll=document.getElementById('logoutLink');
