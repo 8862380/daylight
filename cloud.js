@@ -15,6 +15,7 @@
     opts = opts || {};
     var headers = { apikey: ANON, 'Content-Type': 'application/json' };
     if (opts.token) headers.Authorization = 'Bearer ' + opts.token;
+    if (opts.prefer) headers.Prefer = opts.prefer;
     return fetch(URL + path, {
       method: opts.method || 'GET',
       headers: headers,
@@ -147,6 +148,7 @@
     return api('/rest/v1/daylight_data', {
       method: 'POST',
       token: t,
+      prefer: 'resolution=merge-duplicates',
       body: { user_id: u, data: data, updated_at: new Date().toISOString() },
       headers: {},
     }).catch(function () {});
