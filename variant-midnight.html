@@ -823,6 +823,9 @@ if(av)av.addEventListener('click',function(){
 const ll=document.getElementById('logoutLink');
 if(ll)ll.addEventListener('click',function(e){e.preventDefault();DaylightAuth.logout();location.reload();});
 function boot(){
+  dateLabel();
+  applyGreeting();
+  setInterval(dateLabel,60000);
   USER=DaylightAuth.user();
   if(USER){
     KEY=DaylightAuth.dataKey(DaylightAuth.uid());
@@ -834,7 +837,7 @@ function boot(){
       if(cd&&typeof cd==='object'){
         S=mergeData(cd);
         try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}
-        renderTasks();renderWork();renderGoals();renderExpenses();renderCourses();renderStudy();applyGreeting();dateLabel();
+        renderTasks();renderWork();renderGoals();renderExpenses();renderCourses();renderStudy();applyGreeting();
       }else{
         save();
       }
