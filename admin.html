@@ -117,6 +117,14 @@ h1{font-size:22px;font-weight:800;letter-spacing:-.4px}
     所有主题共用同一份数据，修改后立即生效并保存在当前浏览器。管理后台与主页在同一个浏览器里看到的内容是一致的；
     换设备（如手机）需要「导出 → 导入」同步一次。
   </div>
+  <div class="sec">
+    <h2>个人设置</h2>
+    <div class="sub">主页大标题显示的问候语，每个用户可不同</div>
+    <div class="add" style="max-width:560px">
+      <input id="greetingInput" placeholder="问候语">
+      <button id="greetingSave">保存问候语</button>
+    </div>
+  </div>
   <div class="stats">
     <div class="st"><b id="cTasks">0</b><span>任务 · 未完成</span></div>
     <div class="st"><b id="cWork">0</b><span>工作事项</span></div>
@@ -205,6 +213,7 @@ const KEY=DaylightAuth.dataKey(USER);
 const CATS=['餐饮','学习','交通','生活','其他'];
 const CAT_COLORS={餐饮:'#f97316',学习:'#8b5cf6',交通:'#0ea5e9',生活:'#10b981',其他:'#64748b'};
 const DEFAULTS={
+  profile:{greeting:'欢迎来到勇勇任务栏，勇往向前，阿勇'},
   tasks:[
     {t:'晨间复盘 · 15 分钟',done:true,p:'high'},
     {t:'完成产品需求文档 v2',done:false,p:'high'},
@@ -273,7 +282,11 @@ function toast(msg){
 let editing=null;
 
 function renderAll(){
-  renderTasks();renderWork();renderGoals();renderExpenses();renderCourses();renderStudy();renderBase();renderCounts();
+  renderTasks();renderWork();renderGoals();renderExpenses();renderCourses();renderStudy();renderBase();renderCounts();renderProfile();
+}
+function renderProfile(){
+  const inp=document.getElementById('greetingInput');
+  if(inp)inp.value=(S.profile&&S.profile.greeting)||'';
 }
 function renderCounts(){
   document.getElementById('cTasks').textContent=S.tasks.filter(t=>!t.done).length;
@@ -491,6 +504,13 @@ document.getElementById('studySave').addEventListener('click',()=>{
     S.study[parseInt(inp.dataset.i,10)].h=parseFloat(inp.value)||0;
   });
   save();renderAll();toast('学习数据已保存 ✓');
+});
+document.getElementById('greetingSave').addEventListener('click',function(){
+  const v=document.getElementById('greetingInput').value.trim();
+  if(!v){toast('请输入问候语');return;}
+  if(!S.profile)S.profile={};
+  S.profile.greeting=v;
+  save();renderProfile();toast('问候语已保存 ✓');
 });
 document.getElementById('baseSave').addEventListener('click',()=>{
   document.querySelectorAll('.ef-base').forEach(inp=>{
