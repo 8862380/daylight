@@ -80,6 +80,17 @@ h1{font-size:22px;font-weight:800;letter-spacing:-.4px}
 .login-fields input:focus{border-color:#6366f1}
 .login-btn{padding:13px;border-radius:14px;border:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:14px;font-weight:700;cursor:pointer}
 .user-chip{font-size:12px;font-weight:700;padding:8px 14px;border-radius:999px;background:#e9ecf5;color:#5b6478;align-self:center}
+.user-card{border:1px solid #e3e8f2;border-radius:16px;padding:14px 16px;margin-bottom:10px;background:#fbfcff}
+.uc-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.uc-head b{font-size:14px}
+.uc-counts{font-size:11px;color:#8a93a8;margin-left:auto;margin-right:6px}
+.uc-detail{margin-top:12px;border-top:1px dashed #e8ecf6;padding-top:10px}
+.uc-sec{margin-bottom:10px}
+.uc-sec b{font-size:12px;color:#5b6478;display:block;margin-bottom:4px}
+.uc-line{font-size:13px;color:#3d465c;padding:2px 0}
+.uc-line em{font-style:normal;color:#9aa3b8;margin-left:6px;font-size:11px}
+.uc-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#d8dcec;margin-right:6px}
+.uc-dot.on{background:#34d399}
 @media (max-width:700px){
   .stats{grid-template-columns:repeat(3,1fr)}
   .study-grid{grid-template-columns:repeat(4,1fr)}
@@ -138,6 +149,11 @@ h1{font-size:22px;font-weight:800;letter-spacing:-.4px}
       <input id="greetingInput" placeholder="问候语">
       <button id="greetingSave">保存问候语</button>
     </div>
+  </div>
+  <div class="sec">
+    <h2>全部用户数据</h2>
+    <div class="sub">本设备上所有注册用户的独立数据（查看 / 删除），当前用户数据请在下方各模块编辑</div>
+    <div id="userDataList"></div>
   </div>
   <div class="stats">
     <div class="st"><b id="cTasks">0</b><span>任务 · 未完成</span></div>
@@ -296,12 +312,85 @@ function toast(msg){
 let editing=null;
 
 function renderAll(){
-  renderTasks();renderWork();renderGoals();renderExpenses();renderCourses();renderStudy();renderBase();renderCounts();renderProfile();
+  renderTasks();renderWork();renderGoals();renderExpenses();renderCourses();renderStudy();renderBase();renderCounts();renderProfile();renderUserData();
 }
 function renderProfile(){
   const inp=document.getElementById('greetingInput');
   if(inp)inp.value=(S.profile&&S.profile.greeting)||'';
 }
+let expandedUser=null;
+function userDetailHtml(data){
+  if(!data)return '<div class="sub" style="margin:0">暂无数据</div>';
+  let h='';
+  if(data.tasks&&data.tasks.length){
+    h+='<div class="uc-sec"><b>任务</b>'+data.tasks.map(t=>'<div class="uc-line"><span class="uc-dot'+(t.done?' on':'')+'"></span>'+esc(t.t)+'</div>').join('')+'</div>';
+  }
+  if(data.work&&data.work.length){
+    h+='<div class="uc-sec"><b>工作</b>'+data.work.map(w=>'<div class="uc-line">· '+esc(w.title)+' <em>'+esc(w.time)+'</em></div>').join('')+'</div>';
+  }
+  if(data.goals&&data.goals.length){
+    h+='<div class="uc-sec"><b>目标</b>'+data.goals.map(g=>'<div class="uc-line">· '+esc(g.name)+' <em>'+esc(g.cur)+' / '+esc(g.max)+'</em></div>').join('')+'</div>';
+  }
+  if(data.expenses&&data.expenses.length){
+    h+='<div class="uc-sec"><b>消费</b>'+data.expenses.map(e=>'<div class="uc-line">· '+esc(e.name)+' <em>'+money(e.amt)+'</em></div>').join('')+'</div>';
+  }
+  if(data.courses&&data.courses.length){
+    h+='<div class="uc-sec"><b>课程</b>'+data.courses.map(c=>'<div class="uc-line">· '+esc(c.title)+' <em>'+(c.done?'已完成':'未完成')+'</em></div>').join('')+'</div>';
+  }
+  return h||'<div class="sub" style="margin:0">暂无数据</div>';
+}
+function renderUserData(){
+  const box=document.getElementById('userDataList');
+  if(!box)return;
+  box.innerHTML='';
+  const ps=DaylightAuth.profiles();
+  if(!ps.length){
+    box.innerHTML='<div class="sub" style="margin:0">本设备还没有注册用户</div>';
+    return;
+  }
+  ps.forEach((p,pi)=>{
+    let data=null;
+    try{data=JSON.parse(localStorage.getItem(DaylightAuth.dataKey(p.name))||'null');}catch(e){}
+    const tcount=data&&data.tasks?data.tasks.length:0;
+    const wcount=data&&data.work?data.work.length:0;
+    const gcount=data&&data.goals?data.goals.length:0;
+    const ecount=data&&data.expenses?data.expenses.length:0;
+    const ccount=data&&data.courses?data.courses.length:0;
+    const study=data&&data.study?data.study.reduce((a,s)=>a+s.h,0).toFixed(1):'0';
+    const card=document.createElement('div');card.className='user-card';
+    card.innerHTML='<div class="uc-head"><span class="pc-avatar">'+esc(p.name.charAt(0)||'?')+'</span><b>'+esc(p.name)+'</b>'+
+      (p.pin?'<span class="chip">有密码</span>':'<span class="chip">无密码</span>')+
+      '<span class="uc-counts">任务 '+tcount+' · 工作 '+wcount+' · 目标 '+gcount+' · 消费 '+ecount+' · 课程 '+ccount+' · 学习 '+study+'h</span>'+
+      '<button class="ico" data-u="'+pi+'" data-ud="view">'+(expandedUser===p.name?'收起':'查看')+'</button>'+
+      '<button class="ico del" data-u="'+pi+'" data-ud="del">✕</button></div>';
+    if(expandedUser===p.name){
+      card.innerHTML+='<div class="uc-detail">'+userDetailHtml(data)+'</div>';
+    }
+    box.appendChild(card);
+  });
+}
+document.getElementById('userDataList').addEventListener('click',function(e){
+  const btn=e.target.closest('[data-ud]');
+  if(!btn)return;
+  const pi=parseInt(btn.dataset.u,10);
+  const ps=DaylightAuth.profiles();
+  const p=ps[pi];
+  if(!p)return;
+  if(btn.dataset.ud==='view'){
+    expandedUser=expandedUser===p.name?null:p.name;
+    renderUserData();
+  }
+  if(btn.dataset.ud==='del'){
+    if(p.name===USER){toast('不能删除当前登录用户');return;}
+    if(confirm('确定删除用户「'+p.name+'」及其全部数据？')){
+      ps.splice(pi,1);
+      DaylightAuth.saveProfiles(ps);
+      localStorage.removeItem(DaylightAuth.dataKey(p.name));
+      if(expandedUser===p.name)expandedUser=null;
+      renderUserData();toast('已删除用户');
+    }
+  }
+});
 function renderCounts(){
   document.getElementById('cTasks').textContent=S.tasks.filter(t=>!t.done).length;
   document.getElementById('cWork').textContent=S.work.length;
