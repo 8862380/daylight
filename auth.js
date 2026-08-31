@@ -9,10 +9,14 @@
   }
 
   function user() { return window.DaylightCloud ? DaylightCloud.email() : ''; }
+  function displayName() {
+    if (!window.DaylightCloud) return '';
+    return DaylightCloud.name() || DaylightCloud.email();
+  }
   function uid() { return window.DaylightCloud ? DaylightCloud.uid() : ''; }
   function init() { return window.DaylightCloud ? DaylightCloud.init() : Promise.resolve(null); }
   function login(email, password) { return window.DaylightCloud.signIn(email, password); }
-  function signup(name, email, password) { return window.DaylightCloud.signUp(name, email, password); }
+  function signup(name, password) { return window.DaylightCloud.signUp(name, password); }
   function logout() { if (window.DaylightCloud) DaylightCloud.signOut(); }
   function dataKey(u) { return 'daylight_data_' + u; }
   function isAdmin() { return window.DaylightCloud ? DaylightCloud.isAdmin() : false; }
@@ -24,48 +28,45 @@
     var submit = ov.querySelector('.login-submit');
     var signupBtn = ov.querySelector('.login-signup');
     var status = ov.querySelector('.login-status');
-    var nameEl = ov.querySelector('.login-name');
-    var emailEl = ov.querySelector('.login-email');
+    var idEl = ov.querySelector('.login-id');
     var passEl = ov.querySelector('.login-pass');
     function busy(v) {
       if (submit) submit.disabled = v;
       if (signupBtn) signupBtn.disabled = v;
     }
     function enter() {
-      if (!emailEl || !passEl) return;
-      var email = emailEl.value.trim();
+      if (!idEl || !passEl) return;
+      var id = idEl.value.trim();
       var pass = passEl.value;
-      if (!email || !pass) { if (status) status.textContent = '请输入邮箱和密码'; return; }
+      if (!id || !pass) { if (status) status.textContent = '请输入用户名和密码'; return; }
       if (status) status.textContent = '登录中…';
       busy(true);
-      login(email, pass).then(function (r) {
+      login(id, pass).then(function (r) {
         busy(false);
         if (r.ok) { if (status) status.textContent = ''; onEnter(); }
         else if (status) status.textContent = r.error || '登录失败';
       });
     }
     function doSignup() {
-      if (!nameEl || !emailEl || !passEl) return;
-      var name = nameEl.value.trim();
-      var email = emailEl.value.trim();
+      if (!idEl || !passEl) return;
+      var name = idEl.value.trim();
       var pass = passEl.value;
-      if (!name) { if (status) status.textContent = '请填写名字'; return; }
-      if (!email) { if (status) status.textContent = '请填写邮箱'; return; }
+      if (name.length < 2) { if (status) status.textContent = '用户名至少 2 个字符'; return; }
       if (pass.length < 6) { if (status) status.textContent = '密码至少 6 位'; return; }
       if (status) status.textContent = '注册中…';
       busy(true);
-      signup(name, email, pass).then(function (r) {
+      signup(name, pass).then(function (r) {
         busy(false);
         if (r.ok) {
           if (r.confirmed) { if (status) status.textContent = ''; onEnter(); }
-          else if (status) status.textContent = '注册成功！请到邮箱点击确认链接后登录';
+          else if (status) status.textContent = '注册成功！如无法登录，请到 Supabase 关闭“邮箱确认”开关';
         }
         else if (status) status.textContent = r.error || '注册失败';
       });
     }
     if (submit) submit.onclick = enter;
     if (signupBtn) signupBtn.onclick = doSignup;
-    if (emailEl) emailEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') enter(); });
+    if (idEl) idEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') enter(); });
     if (passEl) passEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') enter(); });
   }
 
@@ -87,6 +88,7 @@
     profiles: function () { return []; },
     saveProfiles: function () {},
     user: user,
+    displayName: displayName,
     uid: uid,
     init: init,
     login: login,
