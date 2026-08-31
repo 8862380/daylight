@@ -599,7 +599,7 @@ document.getElementById('goalAdd').addEventListener('click',()=>{
 });
 document.getElementById('expAdd').addEventListener('click',()=>{
   const v=document.getElementById('expName').value.trim();if(!v)return;
-  S.expenses.push({name:v,cat:document.getElementById('expCat').value,amt:parseFloat(document.getElementById('expAmt').value)||0,time:document.getElementById('expTime').value.trim()||'--:--',monthly:document.getElementById('expMonthly').checked});
+  S.expenses.push({name:v,cat:document.getElementById('expCat').value,amt:parseFloat(document.getElementById('expAmt').value)||0,time:document.getElementById('expTime').value.trim()||DaylightTime.fmtHM(),monthly:document.getElementById('expMonthly').checked});
   ['expName','expAmt','expTime'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('expMonthly').checked=false;
   save();renderAll();toast('已添加 ✓');
