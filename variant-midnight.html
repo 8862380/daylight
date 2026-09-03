@@ -195,6 +195,21 @@ input,select{font-family:inherit}
 .add-study input{max-width:120px;padding:11px 15px;border-radius:14px;border:1px solid var(--card-border);background:var(--field);color:var(--text);font-size:13px;outline:none}
 .add-study button{padding:11px 16px;border-radius:14px;background:var(--accent);color:#fff;font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer}
 
+/* history */
+.hrow{display:flex;align-items:center;gap:12px;padding:13px 6px;border-bottom:1px dashed var(--card-border);cursor:pointer;flex-wrap:wrap;transition:.15s}
+.hrow:hover{background:var(--chip)}
+.hday{font-size:14px;font-weight:700;min-width:118px}
+.hsum{font-size:12px;color:var(--text2);flex:1;min-width:160px}
+.harrow{color:var(--text3);font-size:12px}
+.hdet{margin-top:14px;padding-top:12px;border-top:1px dashed var(--card-border);width:100%}
+.hlist{max-height:440px;overflow-y:auto;padding-right:4px}
+.h-empty{color:var(--text3);font-size:13px;text-align:center;padding:22px 0}
+.hsec{font-size:11px;font-weight:700;color:var(--text2);margin:10px 0 4px;letter-spacing:.5px}
+.hline{display:flex;align-items:center;gap:8px;padding:3px 0;font-size:13px}
+.hline em{font-style:normal;color:var(--text2);margin-left:auto;font-size:12px}
+.hdot{width:8px;height:8px;border-radius:50%;background:#d8dcec;flex-shrink:0}
+.hdot.on{background:var(--good)}
+
 /* delete / feedback */
 .del{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text3);background:var(--chip);cursor:pointer;flex-shrink:0;transition:.15s;margin-left:8px}
 .del:hover{color:#fff;background:#f43f5e}
@@ -325,6 +340,7 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--text3)}
       <a href="#expenses">消费</a>
       <a href="#courses">课程</a>
       <a href="#study">学习</a>
+      <a href="#history">记录</a>
     </nav>
     <div class="nav-right">
       <div class="search">
@@ -445,6 +461,15 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--text3)}
       </article>
     </section>
 
+    <section class="card glass" id="history" style="margin-top:16px">
+      <div class="card-head">
+        <div class="card-ico" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M12 15l1.5 1.5L17 13"/></svg></div>
+        <div><h2>我的每日记录</h2><small>每天自动存档 · 点日期查看当天内容</small></div>
+        <div class="pill spacer" id="historyCount">自动记录中</div>
+      </div>
+      <div id="historyList"><div class="h-empty">加载中…</div></div>
+    </section>
+
     <footer>Daylight · 个人日程面板 — 设计灵感来自 Apple 设计语言，融合丰富色彩 · <a href="#" id="logoutLink" style="color:var(--accent);font-weight:600">退出登录</a></footer>
   </main>
 </div>
@@ -526,6 +551,12 @@ function save(){
   saveTimer=setTimeout(function(){
     DaylightCloud.saveData(S);
     DaylightCloud.saveProfile(DaylightAuth.name()||'', (S.profile&&S.profile.greeting)||'');
+    DaylightCloud.saveDaySnapshot(S, DaylightTime.dayStr()).then(function(){
+      const today=DaylightTime.dayStr();
+      historyCache=historyCache.filter(function(r){return String(r.day)!==today;});
+      historyCache.unshift({day:today,data:S});
+      renderHistory();
+    });
   },500);
 }
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -694,6 +725,74 @@ function renderStudy(){
   document.getElementById('studyWeekTotal').textContent=fmtN(total)+'h';
   document.getElementById('studyAvg').textContent=(total/S.study.length).toFixed(1)+'h';
 }
+let historyCache=[];
+let expandedDay=null;
+function daySummaryHtml(data){
+  if(!data)return '暂无内容';
+  const t=data.tasks||[];
+  const done=t.filter(x=>x.done).length;
+  const ex=data.expenses||[];
+  const exTotal=ex.reduce((a,e)=>a+(e.amt||0),0);
+  const st=data.study||[];
+  const study=st.reduce((a,s)=>a+(s.h||0),0);
+  return '任务 '+(t.length?done+'/'+t.length:0)+' · 消费 '+money(exTotal)+' · 学习 '+(study?study.toFixed(1):0)+'h';
+}
+function dayDetailHtml(data){
+  if(!data)return '<div class="h-empty">当天暂无记录</div>';
+  let h='';
+  const t=data.tasks||[];
+  if(t.length){
+    h+='<div class="hsec">任务</div>'+t.map(x=>'<div class="hline"><span class="hdot'+(x.done?' on':'')+'"></span>'+esc(x.t)+'</div>').join('');
+  }
+  const w=data.work||[];
+  if(w.length){
+    h+='<div class="hsec">工作</div>'+w.map(x=>'<div class="hline">· '+esc(x.title)+'<em>'+esc(x.time)+'</em></div>').join('');
+  }
+  const ex=data.expenses||[];
+  if(ex.length){
+    h+='<div class="hsec">消费</div>'+ex.map(x=>'<div class="hline">· '+esc(x.name)+'<em>'+money(x.amt)+'</em></div>').join('');
+  }
+  const st=data.study||[];
+  if(st.length){
+    const total=st.reduce((a,s)=>a+(s.h||0),0);
+    h+='<div class="hsec">学习</div><div class="hline">本周学习 '+total.toFixed(1)+' 小时</div>';
+  }
+  const cs=data.courses||[];
+  if(cs.length){
+    h+='<div class="hsec">课程</div>'+cs.map(x=>'<div class="hline">· '+esc(x.title)+'<em>'+(x.done?'已完成':'未完成')+'</em></div>').join('');
+  }
+  return h||'<div class="h-empty">当天暂无记录</div>';
+}
+function renderHistory(){
+  const box=document.getElementById('historyList');
+  const cnt=document.getElementById('historyCount');
+  if(!box)return;
+  if(!historyCache.length){
+    box.innerHTML='<div class="h-empty">还没有历史记录 —— 你今天添加的内容会自动存档到这里，以后随时回看</div>';
+    if(cnt)cnt.textContent='暂无记录';
+    return;
+  }
+  if(cnt)cnt.textContent=historyCache.length+' 天';
+  box.innerHTML='';
+  historyCache.forEach(function(row){
+    const day=String(row.day||'');
+    const data=row.data||null;
+    const isOpen=expandedDay===day;
+    const el=document.createElement('div');el.className='hrow';
+    el.innerHTML='<span class="hday">'+DaylightTime.fmtDay(day)+'</span><span class="hsum">'+daySummaryHtml(data)+'</span><span class="harrow">'+(isOpen?'收起 ▾':'查看 ›')+'</span>';
+    if(isOpen){
+      el.innerHTML+='<div class="hdet">'+dayDetailHtml(data)+'</div>';
+    }
+    el.addEventListener('click',function(){expandedDay=expandedDay===day?null:day;renderHistory();});
+    box.appendChild(el);
+  });
+}
+function refreshHistory(){
+  DaylightCloud.loadHistory(90).then(function(rows){
+    historyCache=rows||[];
+    renderHistory();
+  });
+}
 
 function addTask(){
   const inp=document.getElementById('addInput');
@@ -833,6 +932,7 @@ function boot(){
     const avBox=document.getElementById('avatarBox');
     if(avBox)avBox.textContent=(DaylightAuth.name()||'勇').charAt(0);
     renderTasks();renderWork();renderGoals();renderExpenses();renderCourses();renderStudy();applyGreeting();dateLabel();
+    refreshHistory();
     DaylightCloud.loadData().then(function(cd){
       if(cd&&typeof cd==='object'){
         S=mergeData(cd);
