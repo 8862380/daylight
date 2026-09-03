@@ -190,6 +190,27 @@
     }).catch(function () { return []; });
   }
 
+  function saveDaySnapshot(data, day) {
+    var u = uid(), t = token();
+    if (!u || !t) return Promise.resolve();
+    return api('/rest/v1/daylight_history', {
+      method: 'POST',
+      token: t,
+      prefer: 'resolution=merge-duplicates',
+      body: { user_id: u, day: day, data: data, updated_at: new Date().toISOString() },
+    }).catch(function () {});
+  }
+
+  function loadHistory(limit) {
+    var u = uid(), t = token();
+    if (!u || !t) return Promise.resolve([]);
+    return api('/rest/v1/daylight_history?select=day,data&order=day.desc&limit=' + (limit || 90), { token: t })
+      .then(function (res) {
+        if (res.status === 200 && Array.isArray(res.json)) return res.json;
+        return [];
+      }).catch(function () { return []; });
+  }
+
   window.DaylightCloud = {
     url: URL,
     anonKey: ANON,
@@ -209,6 +230,8 @@
     loadProfile: loadProfile,
     saveProfile: saveProfile,
     adminAll: adminAll,
+    saveDaySnapshot: saveDaySnapshot,
+    loadHistory: loadHistory,
   };
 
   // 北京时间工具（所有页面统一用 Asia/Shanghai）
@@ -225,6 +248,18 @@
   }
   window.DaylightTime = {
     parts: bjParts,
+    dayStr: function () {
+      var p = bjParts();
+      return p.year + '-' + p.month + '-' + p.day;
+    },
+    fmtDay: function (dayStr) {
+      var a = String(dayStr || '').split('-');
+      if (a.length < 3) return dayStr || '';
+      var y = parseInt(a[0], 10), m = parseInt(a[1], 10), d = parseInt(a[2], 10);
+      var names = ['日', '一', '二', '三', '四', '五', '六'];
+      var wd = names[new Date(Date.UTC(y, m - 1, d)).getUTCDay()];
+      return m + '月' + d + '日 星期' + wd;
+    },
     fmtHM: function () {
       var p = bjParts();
       return (p.hour || '00') + ':' + (p.minute || '00');
