@@ -470,11 +470,11 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--text3)}
       <div id="historyList"><div class="h-empty">加载中…</div></div>
     </section>
 
-    <footer>Daylight · 个人日程面板 — 设计灵感来自 Apple 设计语言 · <span style="opacity:.75">版本 v17</span> · <a href="#" id="logoutLink" style="color:var(--accent);font-weight:600">退出登录</a></footer>
+    <footer>Daylight · 个人日程面板 — 设计灵感来自 Apple 设计语言 · <span style="opacity:.75">版本 v18</span> · <a href="#" id="logoutLink" style="color:var(--accent);font-weight:600">退出登录</a></footer>
   </main>
 </div>
-<script src="cloud.v17.js"></script>
-<script src="auth.v17.js"></script>
+<script src="cloud.v18.js"></script>
+<script src="auth.v18.js"></script>
 <script>
 
 const THEME='midnight';
@@ -779,7 +779,7 @@ function renderHistory(){
     const data=row.data||null;
     const isOpen=expandedDay===day;
     const el=document.createElement('div');el.className='hrow';
-    el.innerHTML='<span class="hday">'+DaylightTime.fmtDay(day)+'</span><span class="hsum">'+daySummaryHtml(data)+'</span><span class="harrow">'+(isOpen?'收起 ▾':'查看 ›')+'</span>';
+    el.innerHTML='<span class="hday">'+fmtDaySafe(day)+'</span><span class="hsum">'+daySummaryHtml(data)+'</span><span class="harrow">'+(isOpen?'收起 ▾':'查看 ›')+'</span>';
     if(isOpen){
       el.innerHTML+='<div class="hdet">'+dayDetailHtml(data)+'</div>';
     }
@@ -788,10 +788,28 @@ function renderHistory(){
   });
 }
 function refreshHistory(){
-  DaylightCloud.loadHistory(90).then(function(rows){
-    historyCache=rows||[];
-    renderHistory();
-  });
+  try{
+    if(!window.DaylightCloud||typeof DaylightCloud.loadHistory!=='function'){
+      const c=document.getElementById('historyCount');if(c)c.textContent='请刷新页面';
+      return;
+    }
+    DaylightCloud.loadHistory(90).then(function(rows){
+      historyCache=rows||[];
+      renderHistory();
+    }).catch(function(){
+      const c=document.getElementById('historyCount');if(c)c.textContent='加载失败';
+    });
+  }catch(err){
+    const c=document.getElementById('historyCount');if(c)c.textContent='加载失败';
+  }
+}
+function fmtDaySafe(d){
+  try{
+    if(window.DaylightTime&&DaylightTime.fmtDay)return DaylightTime.fmtDay(d);
+  }catch(e){}
+  const a=String(d||'').split('-');
+  if(a.length<3)return d||'';
+  return parseInt(a[1],10)+'月'+parseInt(a[2],10)+'日';
 }
 
 function addTask(){
@@ -927,26 +945,34 @@ function boot(){
   setInterval(dateLabel,60000);
   USER=DaylightAuth.user();
   if(USER){
-    KEY=DaylightAuth.dataKey(DaylightAuth.uid());
-    S=load();
-    const avBox=document.getElementById('avatarBox');
-    if(avBox)avBox.textContent=(DaylightAuth.name()||'勇').charAt(0);
-    renderTasks();renderWork();renderGoals();renderExpenses();renderCourses();renderStudy();applyGreeting();dateLabel();
-    refreshHistory();
-    DaylightCloud.loadData().then(function(cd){
-      if(cd&&typeof cd==='object'){
-        S=mergeData(cd);
-        try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}
-        renderTasks();renderWork();renderGoals();renderExpenses();renderCourses();renderStudy();applyGreeting();
-      }else{
-        save();
-      }
-    });
+    try{
+      KEY=DaylightAuth.dataKey(DaylightAuth.uid());
+      S=load();
+      const avBox=document.getElementById('avatarBox');
+      if(avBox)avBox.textContent=(DaylightAuth.name()||'勇').charAt(0);
+      renderTasks();renderWork();renderGoals();renderExpenses();renderCourses();renderStudy();applyGreeting();dateLabel();
+      refreshHistory();
+      DaylightCloud.loadData().then(function(cd){
+        if(cd&&typeof cd==='object'){
+          S=mergeData(cd);
+          try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}
+          renderTasks();renderWork();renderGoals();renderExpenses();renderCourses();renderStudy();applyGreeting();
+        }else{
+          save();
+        }
+      });
+    }catch(err){
+      const c=document.getElementById('historyCount');if(c)c.textContent='运行异常';
+    }
   }else{
     DaylightAuth.mountLogin('loginOverlay',function(){location.reload();});
   }
 }
 DaylightAuth.init().then(boot);
+window.addEventListener('error',function(){
+  const c=document.getElementById('historyCount');
+  if(c&&c.textContent==='自动记录中')c.textContent='页面异常';
+});
 
 </script>
 <script>
