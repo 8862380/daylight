@@ -733,6 +733,14 @@ function renderStudy(){
 }
 let historyCache=[];
 let expandedDay=null;
+let feeCache=0;
+function canViewRecords(){
+  if(DaylightAuth.isAdmin())return true;
+  return !!(S.access&&S.access.recordsOn);
+}
+function loadFee(){
+  DaylightCloud.getSettings().then(function(f){feeCache=f;renderHistory();});
+}
 function daySummaryHtml(data){
   if(!data)return '暂无内容';
   const t=data.tasks||[];
@@ -773,6 +781,11 @@ function renderHistory(){
   const box=document.getElementById('historyList');
   const cnt=document.getElementById('historyCount');
   if(!box)return;
+  if(!canViewRecords()){
+    box.innerHTML='<div class="h-empty">🔒 每日记录为付费功能'+(feeCache>0?'，价格 ¥'+feeCache+' / 月':'')+'<br><small>请联系管理员付费开通，开通后刷新本页即可查看</small></div>';
+    if(cnt)cnt.textContent='未开通';
+    return;
+  }
   if(!historyCache.length){
     box.innerHTML='<div class="h-empty">还没有历史记录 —— 你今天添加的内容会自动存档到这里，以后随时回看</div>';
     if(cnt)cnt.textContent='暂无记录';
@@ -958,6 +971,7 @@ function boot(){
       if(avBox)avBox.textContent=(DaylightAuth.name()||'勇').charAt(0);
       renderTasks();renderWork();renderGoals();renderExpenses();renderCourses();renderStudy();applyGreeting();dateLabel();
       refreshHistory();
+      loadFee();
       DaylightCloud.loadData().then(function(cd){
         if(cd&&typeof cd==='object'){
           S=mergeData(cd);
