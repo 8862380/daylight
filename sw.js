@@ -1,4 +1,4 @@
-const CACHE = 'daylight-v15';
+const CACHE = 'daylight-v16';
 const SCOPE = self.registration.scope;
 const ASSETS = [
   './',
@@ -22,7 +22,7 @@ const ASSETS = [
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE)
-      .then(c => c.addAll(ASSETS))
+      .then(c => Promise.all(ASSETS.map(a => c.add(a).catch(() => {}))))
       .then(() => self.skipWaiting())
   );
 });
