@@ -211,6 +211,51 @@
       }).catch(function () { return []; });
   }
 
+  function getSettings() {
+    var t = token();
+    if (!t) return Promise.resolve(0);
+    return api('/rest/v1/daylight_settings?select=records_fee&id=eq.1', { token: t })
+      .then(function (res) {
+        if (res.status === 200 && Array.isArray(res.json) && res.json.length) {
+          var n = Number(res.json[0].records_fee);
+          return isNaN(n) ? 0 : n;
+        }
+        return 0;
+      }).catch(function () { return 0; });
+  }
+
+  function saveSettings(fee) {
+    var t = token();
+    if (!t) return Promise.resolve(false);
+    return api('/rest/v1/daylight_settings?id=eq.1', {
+      method: 'PATCH',
+      token: t,
+      body: { records_fee: fee, updated_at: new Date().toISOString() },
+    }).then(function (res) {
+      return res.status === 200 || res.status === 204;
+    }).catch(function () { return false; });
+  }
+
+  function patchUserData(uidTarget, data) {
+    var t = token();
+    if (!t) return Promise.resolve(false);
+    return api('/rest/v1/daylight_data?user_id=eq.' + encodeURIComponent(uidTarget), {
+      method: 'PATCH',
+      token: t,
+      body: { data: data },
+    }).then(function (res) {
+      if (res.status === 200 || res.status === 204) return true;
+      return api('/rest/v1/daylight_data', {
+        method: 'POST',
+        token: t,
+        prefer: 'resolution=merge-duplicates',
+        body: { user_id: uidTarget, data: data, updated_at: new Date().toISOString() },
+      }).then(function (r2) {
+        return r2.status === 200 || r2.status === 201 || r2.status === 204;
+      });
+    }).catch(function () { return false; });
+  }
+
   window.DaylightCloud = {
     url: URL,
     anonKey: ANON,
@@ -232,6 +277,9 @@
     adminAll: adminAll,
     saveDaySnapshot: saveDaySnapshot,
     loadHistory: loadHistory,
+    getSettings: getSettings,
+    saveSettings: saveSettings,
+    patchUserData: patchUserData,
   };
 
   // 北京时间工具（所有页面统一用 Asia/Shanghai）
