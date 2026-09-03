@@ -13,7 +13,8 @@
 <style>
 
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{overflow-x:hidden;width:100%}
 body{
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
   color:var(--text);
@@ -255,7 +256,13 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--text3)}
 }
 @media (max-width:640px){
   .wrap{padding:0 14px 48px}
+  .traffic{display:none}
+  .brand{margin:0 auto}
   .brand span{display:none}
+  .nav{justify-content:center}
+  .nav-links{justify-content:center}
+  .search{width:100%}
+  .nav-right .avatar{margin-left:auto}
   .hero{padding:28px 20px;gap:20px}
   .hero h1{font-size:28px}
   .hero-sub{font-size:14px}
