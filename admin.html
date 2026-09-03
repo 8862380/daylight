@@ -134,14 +134,6 @@ h1{font-size:22px;font-weight:800;letter-spacing:-.4px}
     换设备（如手机）需要「导出 → 导入」同步一次。
   </div>
   <div class="sec">
-    <h2>个人设置</h2>
-    <div class="sub">留空 = 默认「欢迎来到《用户名》每天的任务栏，天天开心 搞薯条！！！」；填文字 = 自定义</div>
-    <div class="add" style="max-width:560px">
-      <input id="greetingInput" placeholder="问候语">
-      <button id="greetingSave">保存问候语</button>
-    </div>
-  </div>
-  <div class="sec">
     <h2>全部用户数据</h2>
     <div class="sub">所有注册用户的账号（名字即用户名）与云端数据。密码为加密存储，任何人也无法查看，忘记只能重置。</div>
     <div id="userDataList"></div>
@@ -313,11 +305,7 @@ function toast(msg){
 let editing=null;
 
 function renderAll(){
-  renderTasks();renderWork();renderGoals();renderExpenses();renderCourses();renderStudy();renderBase();renderCounts();renderProfile();renderUserData();
-}
-function renderProfile(){
-  const inp=document.getElementById('greetingInput');
-  if(inp)inp.value=(S.profile&&S.profile.custom&&S.profile.greeting)||'';
+  renderTasks();renderWork();renderGoals();renderExpenses();renderCourses();renderStudy();renderBase();renderCounts();renderUserData();
 }
 let expandedUser=null;
 function userDetailHtml(data){
@@ -602,13 +590,6 @@ document.getElementById('studySave').addEventListener('click',()=>{
     S.study[parseInt(inp.dataset.i,10)].h=parseFloat(inp.value)||0;
   });
   save();renderAll();toast('学习数据已保存 ✓');
-});
-document.getElementById('greetingSave').addEventListener('click',function(){
-  const v=document.getElementById('greetingInput').value.trim();
-  if(!S.profile)S.profile={};
-  S.profile.greeting=v;
-  S.profile.custom=!!v;
-  save();renderProfile();toast(v?'问候语已保存 ✓':'已恢复默认（含用户名）');
 });
 document.getElementById('baseSave').addEventListener('click',()=>{
   document.querySelectorAll('.ef-base').forEach(inp=>{
