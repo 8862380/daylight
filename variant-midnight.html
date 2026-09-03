@@ -493,7 +493,7 @@ const TYPE_COLORS={任务:'#6366f1',工作:'#f97316',目标:'#10b981',消费:'#e
 const GOAL_COLORS=[['#10b981','#34d399'],['#f97316','#fb923c'],['#ec4899','#f472b6']];
 const ST_TEXT={todo:'待开始',doing:'进行中',done:'已完成'};
 const DEFAULTS={
-  profile:{greeting:'欢迎来到每天开心任务工作栏，搞薯条，加油！！！'},
+  profile:{greeting:'',custom:false},
   tasks:[
     {t:'晨间复盘 · 15 分钟',done:true,p:'high'},
     {t:'完成产品需求文档 v2',done:false,p:'high'},
@@ -570,7 +570,9 @@ function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;',
 function applyGreeting(){
   const t=document.getElementById('greetTitle');
   if(t){
-    const g=S.profile&&S.profile.greeting?S.profile.greeting:'欢迎来到每天开心任务工作栏，搞薯条，加油！！！';
+    const name=(DaylightAuth.name()||'朋友').trim()||'朋友';
+    const dft='欢迎来到《'+name+'》每天的任务栏，天天开心 搞薯条！！！';
+    const g=(S.profile&&S.profile.custom&&S.profile.greeting)?S.profile.greeting:dft;
     t.textContent=g;
   }
 }
