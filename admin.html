@@ -93,6 +93,9 @@ h1{font-size:22px;font-weight:800;letter-spacing:-.4px}
 .uc-line em{font-style:normal;color:#9aa3b8;margin-left:6px;font-size:11px}
 .uc-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#d8dcec;margin-right:6px}
 .uc-dot.on{background:#34d399}
+.fee-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;border:1px solid #e3e8f2;border-radius:14px;background:#fbfcff;margin-bottom:14px}
+.fee-bar b{font-size:13px}
+.fee-bar input{width:120px;padding:8px 10px;border-radius:10px;border:1px solid #e3e8f2;background:#fff;font-size:13px;outline:none}
 @media (max-width:700px){
   .top{justify-content:center;text-align:center}
   .stats{grid-template-columns:repeat(3,1fr)}
@@ -136,6 +139,11 @@ h1{font-size:22px;font-weight:800;letter-spacing:-.4px}
   <div class="sec">
     <h2>全部用户数据</h2>
     <div class="sub">所有注册用户的账号（名字即用户名）与云端数据。密码为加密存储，任何人也无法查看，忘记只能重置。</div>
+    <div class="fee-bar" id="feeBar">
+      <b>每日记录收费（元/月）</b>
+      <input id="feeInput" type="number" step="1" min="0" placeholder="0 = 免费">
+      <button class="btn primary" id="feeSave">保存价格</button>
+    </div>
     <div id="userDataList"></div>
   </div>
   <div class="stats">
@@ -341,6 +349,7 @@ function renderUserData(){
     }
     list.forEach(function(p,pi){
       const data=p.data;
+      const accOn=!!(data&&data.access&&data.access.recordsOn);
       const tcount=data&&data.tasks?data.tasks.length:0;
       const wcount=data&&data.work?data.work.length:0;
       const gcount=data&&data.goals?data.goals.length:0;
@@ -351,7 +360,9 @@ function renderUserData(){
       card.innerHTML='<div class="uc-head"><span class="pc-avatar">'+esc((p.name||'?').charAt(0))+'</span><b>'+esc(p.name||'未命名')+'</b>'+
         (p.id===DaylightAuth.uid()?'<span class="chip">自己</span>':'')+
         (DaylightCloud.isAdmin()?'<span class="admin-badge">管理员</span>':'')+
+        '<span class="chip'+(accOn?' done':'')+'">'+(accOn?'已开通记录':'未开通记录')+'</span>'+
         '<span class="uc-counts">任务 '+tcount+' · 工作 '+wcount+' · 目标 '+gcount+' · 消费 '+ecount+' · 课程 '+ccount+' · 学习 '+study+'h</span>'+
+        (DaylightCloud.isAdmin()?'<button class="ico'+(accOn?' del':'')+'" data-u="'+pi+'" data-ud="'+(accOn?'lock':'unlock')+'">'+(accOn?'关闭':'开通')+'</button>':'')+
         '<button class="ico" data-u="'+pi+'" data-ud="view">'+(expandedUser===p.id?'收起':'查看')+'</button></div>';
       if(expandedUser===p.id){
         card.innerHTML+='<div class="uc-detail">'+userDetailHtml(data)+'</div>';
@@ -367,10 +378,37 @@ document.getElementById('userDataList').addEventListener('click',function(e){
   DaylightCloud.adminAll().then(function(list){
     const p=list[pi];
     if(!p)return;
+    if(btn.dataset.ud==='unlock'||btn.dataset.ud==='lock'){
+      const on=btn.dataset.ud==='unlock';
+      if(confirm(on?'确认给「'+p.name+'」开通每日记录？':'确认关闭「'+p.name+'」的每日记录？')){
+        const d=(p.data&&typeof p.data==='object')?p.data:{};
+        d.access=d.access||{};
+        d.access.recordsOn=on;
+        DaylightCloud.patchUserData(p.id,d).then(function(ok){
+          toast(ok?'已更新 ✓':'更新失败，请重试');
+          renderUserData();
+        });
+      }
+      return;
+    }
     if(btn.dataset.ud==='view'){
       expandedUser=expandedUser===p.id?null:p.id;
       renderUserData();
     }
+  });
+});
+function loadFeeAdmin(){
+  DaylightCloud.getSettings().then(function(f){
+    const i=document.getElementById('feeInput');
+    if(i)i.value=(f||0);
+  });
+}
+document.getElementById('feeSave').addEventListener('click',function(){
+  const i=document.getElementById('feeInput');
+  const v=parseFloat(i.value);
+  if(isNaN(v)||v<0){toast('请输入有效价格');return;}
+  DaylightCloud.saveSettings(v).then(function(ok){
+    toast(ok?'价格已保存 ✓':'保存失败（需要管理员账号）');
   });
 });
 
@@ -634,6 +672,9 @@ function bootAdmin(){
     cu.textContent='当前用户：'+USER;
     cu.innerHTML=cu.textContent+(DaylightCloud.isAdmin()?' <span class="admin-badge">管理员</span>':'');
     renderAll();
+    const fb=document.getElementById('feeBar');
+    if(fb)fb.style.display=DaylightCloud.isAdmin()?'flex':'none';
+    if(DaylightCloud.isAdmin())loadFeeAdmin();
     DaylightCloud.loadData().then(function(cd){
       if(cd&&typeof cd==='object'){
         S=merge(fresh(),cd);
