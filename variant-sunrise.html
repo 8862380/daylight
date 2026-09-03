@@ -961,16 +961,17 @@ function boot(){
         }
       });
     }catch(err){
-      const c=document.getElementById('historyCount');if(c)c.textContent='运行异常';
+      const c=document.getElementById('historyCount');
+      if(c)c.textContent='异常:'+String(err&&err.message||err).slice(0,50);
     }
   }else{
     DaylightAuth.mountLogin('loginOverlay',function(){location.reload();});
   }
 }
 DaylightAuth.init().then(boot);
-window.addEventListener('error',function(){
+window.addEventListener('error',function(e){
   const c=document.getElementById('historyCount');
-  if(c&&c.textContent==='自动记录中')c.textContent='页面异常';
+  if(c&&c.textContent==='自动记录中')c.textContent='页面异常:'+String(e&&e.message||'').slice(0,40);
 });
 
 </script>
