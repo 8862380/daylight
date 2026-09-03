@@ -9,6 +9,7 @@
   }
 
   function user() { return window.DaylightCloud ? DaylightCloud.email() : ''; }
+  function authName() { return window.DaylightCloud ? DaylightCloud.name() : ''; }
   function displayName() {
     if (!window.DaylightCloud) return '';
     return DaylightCloud.name() || DaylightCloud.email();
@@ -88,6 +89,7 @@
     profiles: function () { return []; },
     saveProfiles: function () {},
     user: user,
+    name: authName,
     displayName: displayName,
     uid: uid,
     init: init,
