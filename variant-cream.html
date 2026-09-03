@@ -570,7 +570,7 @@ function applyGreeting(){
   const t=document.getElementById('greetTitle');
   if(t){
     const name=(DaylightAuth.name()||'朋友').trim()||'朋友';
-    const dft='欢迎来到《'+name+'》每天的任务栏，天天开心 搞薯条！！！';
+    const dft='欢迎来到'+name+'每天的任务栏，天天开心 搞薯条！！！';
     const g=(S.profile&&S.profile.custom&&S.profile.greeting)?S.profile.greeting:dft;
     t.textContent=g;
   }
