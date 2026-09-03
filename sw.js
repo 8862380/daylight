@@ -1,4 +1,4 @@
-const CACHE = 'daylight-v14';
+const CACHE = 'daylight-v15';
 const SCOPE = self.registration.scope;
 const ASSETS = [
   './',
