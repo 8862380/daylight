@@ -65,7 +65,6 @@ h1{font-size:22px;font-weight:800;letter-spacing:-.4px}
 #toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(20px);background:rgba(23,28,47,.92);color:#fff;padding:11px 20px;border-radius:999px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:.3s;z-index:99}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 #loginOverlay{position:fixed;inset:0;background:rgba(15,20,40,.45);backdrop-filter:blur(18px);display:none;align-items:center;justify-content:center;z-index:200;padding:20px}
-#adminGate{position:fixed;inset:0;background:rgba(10,15,35,.62);backdrop-filter:blur(20px);display:none;align-items:center;justify-content:center;z-index:300;padding:20px}
 .login-card{width:min(380px,92vw);background:rgba(255,255,255,.92);border:1px solid rgba(255,255,255,.95);border-radius:28px;padding:30px 26px;text-align:center;box-shadow:0 30px 80px rgba(20,30,80,.35)}
 .login-icon{width:72px;height:72px;margin:0 auto 14px;border-radius:20px;background:linear-gradient(135deg,#6366f1,#8b5cf6,#f472b6);position:relative}
 .login-icon::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:34px;font-weight:800}
@@ -102,18 +101,6 @@ h1{font-size:22px;font-weight:800;letter-spacing:-.4px}
 </style>
 </head>
 <body>
-<div id="adminGate">
-  <div class="login-card">
-    <div class="login-icon"></div>
-    <h2>开发者验证</h2>
-    <p id="gateHint">输入开发者密码</p>
-    <div class="login-fields">
-      <input class="gate-pass" type="password" placeholder="开发者密码" autocomplete="off">
-      <input class="gate-pass2" type="password" placeholder="再次输入（首次设置）" autocomplete="off" style="display:none">
-      <button class="gate-btn">进入后台</button>
-    </div>
-  </div>
-</div>
 <div id="loginOverlay">
   <div class="login-card">
     <div class="login-icon"></div>
@@ -133,7 +120,6 @@ h1{font-size:22px;font-weight:800;letter-spacing:-.4px}
     <div class="logo"><span class="dot"></span>Daylight · 后台管理</div>
     <div class="top-actions">
       <span class="user-chip" id="currentUser"></span>
-      <button class="btn" id="changeAdmBtn">修改开发者密码</button>
       <button class="btn" id="logoutBtn">退出</button>
       <a class="btn" href="index.html">← 返回站点</a>
       <button class="btn" id="exportBtn">导出数据</button>
@@ -657,7 +643,6 @@ document.getElementById('resetBtn').addEventListener('click',()=>{
   }
 });
 function bootAdmin(){
-  document.getElementById('adminGate').style.display='none';
   document.getElementById('adminWrap').style.display='block';
   USER=DaylightAuth.displayName();
   if(USER){
@@ -680,51 +665,10 @@ function bootAdmin(){
     DaylightAuth.mountLogin('loginOverlay',function(){location.reload();});
   }
 }
-function gate(){
-  if(DaylightAuth.adminUnlocked()){
-    bootAdmin();
-    return;
-  }
-  const gateEl=document.getElementById('adminGate');
-  const cfg=DaylightAuth.adminGet();
-  const p1=gateEl.querySelector('.gate-pass');
-  const p2=gateEl.querySelector('.gate-pass2');
-  const hint=document.getElementById('gateHint');
-  if(cfg){
-    p2.style.display='none';
-    hint.textContent='输入开发者密码';
-    gateEl.querySelector('.gate-btn').textContent='进入后台';
-  }else{
-    p2.style.display='';
-    hint.textContent='首次使用：设置开发者密码（至少 4 位）';
-    gateEl.querySelector('.gate-btn').textContent='设置并进入';
-  }
-  gateEl.style.display='flex';
-  gateEl.querySelector('.gate-btn').onclick=function(){
-    const v=p1.value;
-    if(!cfg){
-      if(v.length<4){toast('密码至少 4 位');return;}
-      if(v!==p2.value){toast('两次输入不一致');return;}
-      DaylightAuth.setupAdmin(v);
-      bootAdmin();
-    }else{
-      if(DaylightAuth.verifyAdmin(v)!=='ok'){toast('密码错误');return;}
-      DaylightAuth.adminUnlock();
-      bootAdmin();
-    }
-  };
-}
 document.getElementById('logoutBtn').addEventListener('click',function(){
   DaylightAuth.logout();location.reload();
 });
-document.getElementById('changeAdmBtn').addEventListener('click',function(){
-  const v=prompt('输入新的开发者密码（至少 4 位）');
-  if(!v||v.length<4){toast('密码至少 4 位');return;}
-  const v2=prompt('再次输入确认');
-  if(v!==v2){toast('两次输入不一致');return;}
-  DaylightAuth.setupAdmin(v);toast('开发者密码已修改 ✓');
-});
-DaylightAuth.init().then(function(){gate();});
+DaylightAuth.init().then(function(){bootAdmin();});
 </script>
 <script>
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){});}
